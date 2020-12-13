@@ -5,7 +5,7 @@ Just follow the wolf script here: https://medium.com/wolf-crypto/how-to-setup-a-
 Use the below code instead.
 
 ```
-wget https://raw.githubusercontent.com/Geordie-R/coti-fullnode-1.4.1/main/installupdated.sh
-chmod +x installupdated.sh
-./installupdated.sh
+wget https://raw.githubusercontent.com/Geordie-R/coti-fullnode-1.4.1/main/installfullnode.sh
+chmod +x installfullnode.sh
+./installfullnode.sh
 ```
