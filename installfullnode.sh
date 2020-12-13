@@ -13,7 +13,7 @@ GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 COLOR_RESET=$(tput sgr0)
 
-
+apt-get install -y jq
 
 new_version_tag=$(curl -s https://api.github.com/repos/coti-io/coti-node/releases/latest | jq ".tag_name")
 #Remove the front and end double quote
