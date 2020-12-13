@@ -3,7 +3,7 @@
 set -eu -o pipefail # fail on error , debug all lines
 
 LOG_LOCATION=/root/
-exec > >(tee -i $LOG_LOCATION/dockercnode.log)
+exec > >(tee -i $LOG_LOCATION/gcnode.log)
 exec 2>&1
 
 
@@ -13,6 +13,7 @@ GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 COLOR_RESET=$(tput sgr0)
 
+apt-get update -y && apt-get upgrade -y
 apt-get install -y jq
 
 new_version_tag=$(curl -s https://api.github.com/repos/coti-io/coti-node/releases/latest | jq ".tag_name")
