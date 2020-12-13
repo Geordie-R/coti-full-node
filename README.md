@@ -1,2 +1,11 @@
-# coti-full-node
-Coti Full Node For Latest Version
+# coti-fullnode (pulls down latest version)
+Please find below a working solution to run the coti full node on the testnet.
+Just follow the wolf script here: https://medium.com/wolf-crypto/how-to-setup-a-coti-testnet-node-on-vultr-a3710d24f892 as per usual until wolf mentions using the install.sh script.
+
+Use the below code instead.
+
+```
+wget https://raw.githubusercontent.com/Geordie-R/coti-fullnode-1.4.1/main/installupdated.sh
+chmod +x installupdated.sh
+./installupdated.sh
+```
