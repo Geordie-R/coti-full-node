@@ -29,7 +29,7 @@ new_version_tag=${new_version_tag%"\""}
 
 echo "Latest version is $new_version_tag"
 
-echo "Welome to the COTI docker installer .  We will begin to ask you a series of questions.  Please have to hand:"
+echo "Welome to the COTI installer .  We will begin to ask you a series of questions.  Please have to hand:"
 echo "✅ Your SSH Port No"
 echo "✅ Your Ubuntu Username"
 echo "✅ Your email address"
@@ -111,7 +111,7 @@ chown -R coti: /home/$username/coti-fullnode/
 cd /home/$username/coti-fullnode/
 sudo -u coti mvn initialize && sudo -u coti mvn clean compile && sudo -u coti mvn -Dmaven.test.skip=true package
 
-cat <<EOF >/home/$username/docker/data/fullnode1.properties
+cat <<EOF >/home/$username/coti-fullnode/fullnode.properties
 network=TestNet
 server.ip=$serverip
 server.port=7070
