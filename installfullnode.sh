@@ -53,25 +53,25 @@ exit 1
 fi
 
 
-
 #Lets pad the seeds
 
-function pad32chars(){
+function pad64chars(){
 x=$1
-while [ ${#x} -ne 32 ];
+while [ ${#x} -ne 64 ];
 do
 x="0"$x
 done
 echo "$x"
 }
 
-typeset -fx pad32chars
-
+typeset -fx pad64chars
 #Newly padded seed if needed
-seed=$(pad32chars $seed)
-
+seed=$(pad64chars $seed)
 #Newly padded private key if needed
-pkey=$(pad32chars $pkey)
+pkey=$(pad64chars $pkey)
+
+# padding of seeds and key complete
+
 
 
 exec 3<>/dev/tcp/ipv4.icanhazip.com/80 
