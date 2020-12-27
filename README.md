@@ -6,7 +6,7 @@ Use the below code instead.
 
 ```
 
-wget https://github.com/Geordie-R/coti-full-node/blob/PadKeysBranch/installfullnode.sh
+wget https://raw.githubusercontent.com/Geordie-R/coti-full-node/PadKeysBranch/installfullnode.sh
 chmod +x installfullnode.sh
 ./installfullnode.sh
 ```
