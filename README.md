@@ -10,7 +10,3 @@ chmod +x installfullnode.sh
 ./installfullnode.sh
 
 ```
-
-rm -rf upgrade.sh
-wget -O upgrade.sh https://raw.githubusercontent.com/Geordie-R/coti-node-upgrade/main/upgrade.sh && chmod +x upgrade.sh
-./upgrade.sh
