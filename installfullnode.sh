@@ -52,7 +52,27 @@ echo "Some details were not provided.  Script is now exiting.  Please run again 
 exit 1
 fi
 
-#New to here
+
+
+#Lets pad the seeds
+
+function pad32chars(){
+x=$1
+while [ ${#x} -ne 32 ];
+do
+x="0"$x
+done
+echo "$x"
+}
+
+typeset -fx pad32chars
+
+#Newly padded seed if needed
+seed=$(pad32chars $seed)
+
+#Newly padded private key if needed
+pkey=$(pad32chars $pkey)
+
 
 exec 3<>/dev/tcp/ipv4.icanhazip.com/80 
 echo -e 'GET / HTTP/1.0\r\nhost: ipv4.icanhazip.com\r\n\r' >&3 
