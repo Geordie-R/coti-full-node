@@ -91,9 +91,9 @@ echo "✅ Your wallet seed key"
 read -n 1 -r -s -p $'Press enter to begin...\n'
 
 read -p "What is your ssh port number (likely 22 if you do not know)?: " portno
-read -p "What is your ubuntu username (use coti if unsure) ?: " username
+read -p "What is your ubuntu username (use coti if unsure as it will be created fresh) ?: " username
 read -p "What is your email address?: " email
-read -p "What is your server host name e.g. mynode.mydomain.com?: " servername
+read -p "What is your server host name e.g. tutorialnode.cotinodes.com?: " servername
 read -p "What is your wallet private key?: " pkey
 read -p "What is your wallet seed?: " seed
 read -p "What version node software would you like to use. Leave this empty and press enter to use latest version. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
