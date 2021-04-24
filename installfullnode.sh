@@ -29,6 +29,58 @@ new_version_tag=${new_version_tag%"\""}
 
 echo "Latest version is $new_version_tag"
 
+shopt -s globstar dotglob
+
+
+cat << "MENUEOF"
+███╗   ███╗███████╗███╗   ██╗██╗   ██╗
+████╗ ████║██╔════╝████╗  ██║██║   ██║
+██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
+██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
+██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
+MENUEOF
+
+
+
+
+
+PS3='Please choose what node you are installing today.  Mainnet or Testnet. Mainnet is by invite only so you will definitely know if it is mainnet you should be choosing. Please write the number of the menu item and press enter: '
+mainnet="Install a node on to the COTI mainnet"
+testnet="Install a node on to the COTI testnet"
+cancelit="Cancel"
+options=("$mainnet" "$testnet" "$cancelit")
+asktorestart=0
+select opt in "${options[@]}"
+do
+    case $opt in
+        "$mainnet")
+        action="mainnet"
+        echo "You chose a mainnet node install"
+        sleep 1
+         break
+            ;;
+        "$testnet")
+            echo "You chose a TESTNET node install"
+        action="testnet"
+        sleep 1
+        break
+            ;;
+       "$cancelit")
+            echo "${RED}You chose to cancel${COLOR_RESET}"
+        action="cancel"
+        exit 1
+break
+            ;;
+        "Quit")
+            exit 1
+break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
+
 echo "Welome to the COTI installer .  We will begin to ask you a series of questions.  Please have to hand:"
 echo "✅ Your SSH Port No"
 echo "✅ Your Ubuntu Username"
@@ -44,7 +96,14 @@ read -p "What is your email address?: " email
 read -p "What is your server host name e.g. mynode.mydomain.com?: " servername
 read -p "What is your wallet private key?: " pkey
 read -p "What is your wallet seed?: " seed
+read -p "What version node software would you like to use. Leave this empty and press enter to use latest version. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
 
+
+if [[ $new_version_tag_final == "" ]];
+new_version_tag_final = $new_version_tag
+then
+echo "Using user supplied version: $new_version_tag_final"
+fi
 
 if [[ $portno == "" ]] || [[ $username == "" ]] || [[ $email == "" ]] || [[ $servername == "" ]] || [[ $pkey == "" ]] || [[ $seed == "" ]];
 then
@@ -127,9 +186,9 @@ ufw --force enable
 
 cd /home/$username/
 git clone https://github.com/coti-io/coti-fullnode.git
-chown -R coti: /home/$username/coti-fullnode/
+chown -R $username: /home/$username/coti-fullnode/
 cd /home/$username/coti-fullnode/
-sudo -u coti mvn initialize && sudo -u coti mvn clean compile && sudo -u coti mvn -Dmaven.test.skip=true package
+sudo -u $username mvn initialize && sudo -u $username mvn clean compile && sudo -u $username mvn -Dmaven.test.skip=true package
 
 cat <<EOF >/home/$username/coti-fullnode/fullnode.properties
 network=TestNet
@@ -180,10 +239,10 @@ fi
 
 
 
-chown coti /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
-chgrp coti /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
-chown coti /home/$username/coti-fullnode/fullnode.properties
-chgrp coti /home/$username/coti-fullnode/fullnode.properties
+chown $username /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
+chgrp $username /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
+chown $username /home/$username/coti-fullnode/fullnode.properties
+chgrp $username /home/$username/coti-fullnode/fullnode.properties
 
 
 certbot certonly --nginx --non-interactive --agree-tos -m $email -d $servername
@@ -236,10 +295,10 @@ cat <<EOF >/etc/systemd/system/cnode.service
 [Unit]
 Description=COTI Fullnode Service
 [Service]
-WorkingDirectory=/home/coti/coti-fullnode/
-ExecStart=/usr/bin/java -Xmx256m -jar /home/coti/coti-fullnode/fullnode/target/fullnode-$new_version_tag.RELEASE.jar --spring.config.additional-location=fullnode.properties
+WorkingDirectory=/home/$username/coti-fullnode/
+ExecStart=/usr/bin/java -Xmx256m -jar /home/$username/coti-fullnode/fullnode/target/fullnode-$new_version_tag_final.RELEASE.jar --spring.config.additional-location=fullnode.properties
 SuccessExitStatus=143
-User=coti
+User=$username
 Restart=on-failure
 RestartSec=10
 [Install]
