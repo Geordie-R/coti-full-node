@@ -8,7 +8,7 @@ restore_source_param=Remote
 
 
 read -p "What is your ubuntu username for coti node? (if unsure write coti) : " user_name
-config_file="/home/$username/coti-fullnode/fullnode.properties"
+config_file="~/coti-fullnode/fullnode.properties"
 
 function set_config_value(){
   #This replaces a key-pair value
