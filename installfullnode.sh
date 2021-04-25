@@ -233,6 +233,20 @@ whitelist.ips=127.0.0.1,0:0:0:0:0:0:0:1
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
 EOF
 
+
+#IF mainnet lets download the dbrecovery and set db.restore to true!
+if [[ $action == "mainnet" ]];
+then
+wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
+chmod +x dbrecovery.sh
+./dbrecovery.sh "true" "$username"
+fi
+
+
+
+
+
+
 FILE=/home/$username/coti-fullnode/FullNode1_clusterstamp.csv
 if [ -f "$FILE" ]; then
     echo "$FILE already exists, no need to download"
@@ -333,5 +347,12 @@ echo $line
 echo ${GREEN}$line{COLOR_RESET}| grep -q 'COTI FULL NODE IS UP' && break;
 
 done
+
+#IF mainnet lets set db.restore to false!
+if [[ $action == "mainnet" ]];
+then
+./dbrecovery.sh "false" "$username"
+fi
+
 sleep 2
 echo "Your node is registered and running on the COTI Network"
