@@ -20,11 +20,12 @@ RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 COLOR_RESET=$(tput sgr0)
-
+new_version_tag_final = ""
 new_version_tag=$(curl -s https://api.github.com/repos/coti-io/coti-node/releases/latest | jq ".tag_name")
 #Remove the front and end double quote
 new_version_tag=${new_version_tag#"\""}
 new_version_tag=${new_version_tag%"\""}
+
 #new_version_tag=1.4.1 for example
 
 echo "Latest version is $new_version_tag"
@@ -109,6 +110,8 @@ read -p "What is your wallet seed?: " seed
 if [[ $action == "mainnet" ]];
 then
 read -p "Mainnet Question: What version node software would you like to use. This should have been comunicated to you from COTI. If you leave this empty and press enter the script will terminate. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
+else
+new_version_tag_final = $new_version_tag
 fi
 
 # If we are on mainnet and a version isnt chosen, terminate the script
