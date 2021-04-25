@@ -88,6 +88,13 @@ echo "✅ Your email address"
 echo "✅ Your server hostname from Godaddy or namecheap etc e.g. coti.mynode.com"
 echo "✅ Your wallet private key"
 echo "✅ Your wallet seed key"
+
+if [[ $action == "mainnet" ]];
+then
+echo "✅ What version of coti node you would like to use. Coti will communicate this to you. Write latest ONLY if they tell you to use latest commited version."
+fi
+
+
 read -n 1 -r -s -p $'Press enter to begin...\n'
 
 read -p "What is your ssh port number (likely 22 if you do not know)?: " portno
@@ -96,13 +103,24 @@ read -p "What is your email address?: " email
 read -p "What is your server host name e.g. tutorialnode.cotinodes.com?: " servername
 read -p "What is your wallet private key?: " pkey
 read -p "What is your wallet seed?: " seed
-read -p "What version node software would you like to use. Leave this empty and press enter to use latest version. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
 
 
-if [[ $new_version_tag_final == "" ]];
-new_version_tag_final = $new_version_tag
+# If we are on mainnet, ASK for a version to use
+if [[ $action == "mainnet" ]];
 then
-echo "Using user supplied version: $new_version_tag_final"
+read -p "Mainnet Question: What version node software would you like to use. This should have been comunicated to you from COTI. If you leave this empty and press enter the script will terminate. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
+fi
+
+# If we are on mainnet and a version isnt chosen, terminate the script
+if [[ $action == "mainnet" ]] && [[ $new_version_tag_final == "" ]];
+then
+exit 1
+fi
+
+# If we are on mainnet and the user wrote 'latest' then it will pull the latest version!
+if [[ $action == "mainnet" ]] && [[ $new_version_tag_final == "latest" ]];
+then
+new_version_tag_final = $new_version_tag
 fi
 
 if [[ $portno == "" ]] || [[ $username == "" ]] || [[ $email == "" ]] || [[ $servername == "" ]] || [[ $pkey == "" ]] || [[ $seed == "" ]];
