@@ -7,8 +7,16 @@ restore_hash_param=8eeae832927ed4a95cac73ede5c8b3082e6d3c16c5f98a97d6a7f3fa5b9c8
 restore_source_param=Remote
 
 
-read -p "What is your ubuntu username for coti node? (if unsure write coti) : " user_name
-config_file="~/coti-fullnode/fullnode.properties"
+read -p "What is your ubuntu username for coti node? (if unsure write coti, your current username is $(whoami)) : " user_name
+
+if [[ $user_name == "root" ]];
+then
+config_file="/root/coti-fullnode/fullnode.properties"
+else
+config_file="/home/$user_name/coti-fullnode/fullnode.properties"
+fi
+
+
 
 function set_config_value(){
   #This replaces a key-pair value
