@@ -36,6 +36,6 @@ chmod +x dbrecovery.sh
 ```
 wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
 chmod +x dbrecovery.sh
-./dbrecovery.sh "true"
+./dbrecovery.sh "false"
 
 ```
