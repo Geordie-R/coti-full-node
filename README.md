@@ -20,7 +20,7 @@ db.restore.source=Remote
 db.restore.hash=8eeae832927ed4a95cac73ede5c8b3082e6d3c16c5f98a97d6a7f3fa5b9c8ac364b5e7e8c1cf8d8b09bb23003e4029205d0946d676c6c907d6dccbe35dcbac7b
 ```
 
-The true or false variable will depend on what you give for example: ./dbrecovery.sh "true" or ./dbrecovery.sh "false"
+The true or false variable will depend on what you give for example: ./dbrecovery.sh "true" or ./dbrecovery.sh "false".  See the two code snippets below for examples.
 
 ## Misc Options
 
