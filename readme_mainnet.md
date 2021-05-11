@@ -5,7 +5,7 @@ The coti mainnet readme has a few different options including DB restore functio
 For the manual for this please see this link (LINK TO GITBOOK TO FOLLOW)
 
 ```
-wget -O installfullnode.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/installfullnode.sh
+wget -O installfullnode.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/main/installfullnode.sh
 chmod +x installfullnode.sh
 ./installfullnode.sh
 ```
@@ -25,7 +25,7 @@ The true or false variable will depend on what you give for example: ./dbrecover
 
 ### DB Restore ON
 ```
-wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
+wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/main/dbrecovery.sh
 chmod +x dbrecovery.sh
 ./dbrecovery.sh "true"
 
@@ -33,7 +33,7 @@ chmod +x dbrecovery.sh
 
 ### DB Restore OFF
 ```
-wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
+wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/main/dbrecovery.sh
 chmod +x dbrecovery.sh
 ./dbrecovery.sh "false"
 
