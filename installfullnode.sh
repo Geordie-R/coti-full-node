@@ -20,14 +20,67 @@ RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 COLOR_RESET=$(tput sgr0)
-
+new_version_tag_final=""
 new_version_tag=$(curl -s https://api.github.com/repos/coti-io/coti-node/releases/latest | jq ".tag_name")
 #Remove the front and end double quote
 new_version_tag=${new_version_tag#"\""}
 new_version_tag=${new_version_tag%"\""}
+
 #new_version_tag=1.4.1 for example
 
 echo "Latest version is $new_version_tag"
+
+shopt -s globstar dotglob
+
+
+cat << "MENUEOF"
+███╗   ███╗███████╗███╗   ██╗██╗   ██╗
+████╗ ████║██╔════╝████╗  ██║██║   ██║
+██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
+██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
+██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
+MENUEOF
+
+
+
+
+
+PS3='Please choose what node you are installing today.  Mainnet or Testnet. Mainnet is by invite only so you will definitely know if it is mainnet you should be choosing. Please write the number of the menu item and press enter: '
+mainnet="Install a node on to the COTI mainnet"
+testnet="Install a node on to the COTI testnet"
+cancelit="Cancel"
+options=("$mainnet" "$testnet" "$cancelit")
+asktorestart=0
+select opt in "${options[@]}"
+do
+    case $opt in
+        "$mainnet")
+        action="mainnet"
+        echo "You chose a mainnet node install"
+        sleep 1
+         break
+            ;;
+        "$testnet")
+            echo "You chose a TESTNET node install"
+        action="testnet"
+        sleep 1
+        break
+            ;;
+       "$cancelit")
+            echo "${RED}You chose to cancel${COLOR_RESET}"
+        action="cancel"
+        exit 1
+break
+            ;;
+        "Quit")
+            exit 1
+break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
 
 echo "Welome to the COTI installer .  We will begin to ask you a series of questions.  Please have to hand:"
 echo "✅ Your SSH Port No"
@@ -36,15 +89,42 @@ echo "✅ Your email address"
 echo "✅ Your server hostname from Godaddy or namecheap etc e.g. coti.mynode.com"
 echo "✅ Your wallet private key"
 echo "✅ Your wallet seed key"
+
+if [[ $action == "mainnet" ]];
+then
+echo "✅ What version of coti node you would like to use. Coti will communicate this to you. Write latest ONLY if they tell you to use latest commited version."
+fi
+
+
 read -n 1 -r -s -p $'Press enter to begin...\n'
 
 read -p "What is your ssh port number (likely 22 if you do not know)?: " portno
-read -p "What is your ubuntu username (use coti if unsure) ?: " username
+read -p "What is your ubuntu username (use coti if unsure as it will be created fresh) ?: " username
 read -p "What is your email address?: " email
-read -p "What is your server host name e.g. mynode.mydomain.com?: " servername
+read -p "What is your server host name e.g. tutorialnode.cotinodes.com?: " servername
 read -p "What is your wallet private key?: " pkey
 read -p "What is your wallet seed?: " seed
 
+
+# If we are on mainnet, ASK for a version to use
+if [[ $action == "mainnet" ]];
+then
+read -p "Mainnet Question: What version node software would you like to use. This should have been comunicated to you from COTI. If you leave this empty and press enter the script will terminate. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
+else
+new_version_tag_final=$new_version_tag
+fi
+
+# If we are on mainnet and a version isnt chosen, terminate the script
+if [[ $action == "mainnet" ]] && [[ $new_version_tag_final == "" ]];
+then
+exit 1
+fi
+
+# If we are on mainnet and the user wrote 'latest' then it will pull the latest version!
+if [[ $action == "mainnet" ]] && [[ $new_version_tag_final == "latest" ]];
+then
+new_version_tag_final=$new_version_tag
+fi
 
 if [[ $portno == "" ]] || [[ $username == "" ]] || [[ $email == "" ]] || [[ $servername == "" ]] || [[ $pkey == "" ]] || [[ $seed == "" ]];
 then
@@ -127,9 +207,9 @@ ufw --force enable
 
 cd /home/$username/
 git clone https://github.com/coti-io/coti-fullnode.git
-chown -R coti: /home/$username/coti-fullnode/
+chown -R $username: /home/$username/coti-fullnode/
 cd /home/$username/coti-fullnode/
-sudo -u coti mvn initialize && sudo -u coti mvn clean compile && sudo -u coti mvn -Dmaven.test.skip=true package
+sudo -u $username mvn initialize && sudo -u $username mvn clean compile && sudo -u $username mvn -Dmaven.test.skip=true package
 
 cat <<EOF >/home/$username/coti-fullnode/fullnode.properties
 network=TestNet
@@ -156,6 +236,20 @@ whitelist.ips=127.0.0.1,0:0:0:0:0:0:0:1
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
 EOF
 
+
+#IF mainnet lets download the dbrecovery and set db.restore to true!
+if [[ $action == "mainnet" ]];
+then
+wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
+chmod +x dbrecovery.sh
+./dbrecovery.sh "true" "$username"
+fi
+
+
+
+
+
+
 FILE=/home/$username/coti-fullnode/FullNode1_clusterstamp.csv
 if [ -f "$FILE" ]; then
     echo "$FILE already exists, no need to download"
@@ -180,10 +274,10 @@ fi
 
 
 
-chown coti /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
-chgrp coti /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
-chown coti /home/$username/coti-fullnode/fullnode.properties
-chgrp coti /home/$username/coti-fullnode/fullnode.properties
+chown $username /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
+chgrp $username /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
+chown $username /home/$username/coti-fullnode/fullnode.properties
+chgrp $username /home/$username/coti-fullnode/fullnode.properties
 
 
 certbot certonly --nginx --non-interactive --agree-tos -m $email -d $servername
@@ -236,10 +330,10 @@ cat <<EOF >/etc/systemd/system/cnode.service
 [Unit]
 Description=COTI Fullnode Service
 [Service]
-WorkingDirectory=/home/coti/coti-fullnode/
-ExecStart=/usr/bin/java -Xmx256m -jar /home/coti/coti-fullnode/fullnode/target/fullnode-$new_version_tag.RELEASE.jar --spring.config.additional-location=fullnode.properties
+WorkingDirectory=/home/$username/coti-fullnode/
+ExecStart=/usr/bin/java -Xmx256m -jar /home/$username/coti-fullnode/fullnode/target/fullnode-$new_version_tag_final.RELEASE.jar --spring.config.additional-location=fullnode.properties
 SuccessExitStatus=143
-User=coti
+User=$username
 Restart=on-failure
 RestartSec=10
 [Install]
@@ -256,5 +350,12 @@ echo $line
 echo ${GREEN}$line{COLOR_RESET}| grep -q 'COTI FULL NODE IS UP' && break;
 
 done
+
+#IF mainnet lets set db.restore to false!
+if [[ $action == "mainnet" ]];
+then
+./dbrecovery.sh "false" "$username"
+fi
+
 sleep 2
 echo "Your node is registered and running on the COTI Network"
