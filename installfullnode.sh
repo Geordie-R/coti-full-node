@@ -15,6 +15,24 @@ apt-get install -y jq
 
 
 
+
+./installkeygenerator.sh
+node /home/coti/exchange-fullnode/app.js
+
+
+
+exit 1
+
+
+
+
+
+
+
+
+
+
+
 # For output readability
 RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
@@ -80,6 +98,20 @@ break
         *) echo "invalid option $REPLY";;
     esac
 done
+
+
+
+
+echo "Installing keygenerator..."
+./installkeygenerator.sh
+echo "Running keygenerator..."
+node /home/coti/exchange-fullnode/app.js
+
+
+
+
+
+
 
 
 echo "Welome to the COTI installer .  We will begin to ask you a series of questions.  Please have to hand:"
@@ -154,12 +186,12 @@ pkey=$(pad64chars $pkey)
 
 
 
-exec 3<>/dev/tcp/ipv4.icanhazip.com/80 
-echo -e 'GET / HTTP/1.0\r\nhost: ipv4.icanhazip.com\r\n\r' >&3 
+exec 3<>/dev/tcp/ipv4.icanhazip.com/80
+echo -e 'GET / HTTP/1.0\r\nhost: ipv4.icanhazip.com\r\n\r' >&3
 while read i
 do
- [ "$i" ] && serverip="$i" 
-done <&3 
+ [ "$i" ] && serverip="$i"
+done <&3
 
 serverurl=https://$servername
 
@@ -253,7 +285,7 @@ fi
 FILE=/home/$username/coti-fullnode/FullNode1_clusterstamp.csv
 if [ -f "$FILE" ]; then
     echo "$FILE already exists, no need to download"
-else 
+else
     echo "$FILE does not exist, downloading now"
     wget -q --show-progress --progress=bar:force 2>&1 https://www.dropbox.com/s/rpyercs56zmay0z/FullNode1_clusterstamp.csv -P /home/$username/coti-fullnode/
 fi
@@ -346,7 +378,7 @@ systemctl start cnode.service
 echo "Waiting for Coti Node to Start"
 sleep 5
 tail -f /home/$username/coti-fullnode/logs/FullNode1.log | while read line; do
-echo $line  
+echo $line
 echo ${GREEN}$line{COLOR_RESET}| grep -q 'COTI FULL NODE IS UP' && break;
 
 done
