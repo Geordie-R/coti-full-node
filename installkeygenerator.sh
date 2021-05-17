@@ -4,7 +4,7 @@
 username=$1
 path=/home/$username
 filepath=$path/exchange-fullnode-coti.rar
-wget -O $filepath https://github.com/Geordie-R/coti-full-node/blob/New-API-Integration-v1/exchange-fullnode-coti.rar
+wget -O $filepath "https://coti.tips/downloads/exchange-fullnode-coti.rar"
 
 
 sudo apt install npm
