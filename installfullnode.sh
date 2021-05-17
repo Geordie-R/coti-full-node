@@ -1,28 +1,26 @@
 #!/bin/bash
 
+logging=false;
+
 set -eu -o pipefail # fail on error , debug all lines
 
+
+
+
 LOG_LOCATION=/root/
+
+
+if [[ $logging == true ]];
+then
+echo "Logging turned on"
 exec > >(tee -i $LOG_LOCATION/gcnode.log)
 exec 2>&1
-
+fi
 
 apt-get update -y && apt-get upgrade -y
 #Install JQ which makes it easy to interpret JSON
 apt-get update -y
 apt-get install -y jq
-
-
-
-
-
-./installkeygenerator.sh
-node /home/coti/exchange-fullnode/app.js
-
-
-
-exit 1
-
 
 
 
@@ -43,26 +41,27 @@ new_version_tag=$(curl -s https://api.github.com/repos/coti-io/coti-node/release
 #Remove the front and end double quote
 new_version_tag=${new_version_tag#"\""}
 new_version_tag=${new_version_tag%"\""}
-
+API_key=""
 #new_version_tag=1.4.1 for example
 
-echo "Latest version is $new_version_tag"
+echo "Latest version is $new_version_tag\n\n\n\n"
 
 shopt -s globstar dotglob
 
 
 cat << "MENUEOF"
+
+
+
 ███╗   ███╗███████╗███╗   ██╗██╗   ██╗
 ████╗ ████║██╔════╝████╗  ██║██║   ██║
 ██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
 ██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
 ██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
 ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
+
+
 MENUEOF
-
-
-
-
 
 PS3='Please choose what node you are installing today.  Mainnet or Testnet. Mainnet is by invite only so you will definitely know if it is mainnet you should be choosing. Please write the number of the menu item and press enter: '
 mainnet="Install a node on to the COTI mainnet"
@@ -102,30 +101,26 @@ done
 
 
 
-echo "Installing keygenerator..."
-./installkeygenerator.sh
-echo "Running keygenerator..."
-node /home/coti/exchange-fullnode/app.js
 
 
 
 
 
 
-
-
-echo "Welome to the COTI installer .  We will begin to ask you a series of questions.  Please have to hand:"
+echo "Welcome to the COTI Node Installer .  We will begin to ask you a series of questions.  Please have to hand:"
 echo "✅ Your SSH Port No"
 echo "✅ Your Ubuntu Username"
 echo "✅ Your email address"
 echo "✅ Your server hostname from Godaddy or namecheap etc e.g. coti.mynode.com"
-echo "✅ Your wallet private key"
-echo "✅ Your wallet seed key"
+echo "✅ Your API Key if you are an exchange. If you are not an exchange, leave this empty."
+echo "✅ Your wallet private key (if you are not an exchange)"
+echo "✅ Your wallet seed key (if you are not an exchange)"
 
 if [[ $action == "mainnet" ]];
 then
 echo "✅ What version of coti node you would like to use. Coti will communicate this to you. Write latest ONLY if they tell you to use latest commited version."
 fi
+
 
 
 read -n 1 -r -s -p $'Press enter to begin...\n'
@@ -134,34 +129,113 @@ read -p "What is your ssh port number (likely 22 if you do not know)?: " portno
 read -p "What is your ubuntu username (use coti if unsure as it will be created fresh) ?: " username
 read -p "What is your email address?: " email
 read -p "What is your server host name e.g. tutorialnode.cotinodes.com?: " servername
+
+
+read -p "Exchanges may be provided with an API key.  Please enter it now, or leave it empty and press enter if you are not an exchange:" API_key
+
+# Ask for private key and seed if API key wasnt provided.
+if [[ $API_key == "" ]] || [ -z "$API_key" ];
+then
+
 read -p "What is your wallet private key?: " pkey
 read -p "What is your wallet seed?: " seed
-
-
-# If we are on mainnet, ASK for a version to use
-if [[ $action == "mainnet" ]];
-then
-read -p "Mainnet Question: What version node software would you like to use. This should have been comunicated to you from COTI. If you leave this empty and press enter the script will terminate. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
 else
-new_version_tag_final=$new_version_tag
+pkey=""
+seed=""
 fi
+
+
+extra_vers_desc=""
+if [[ $action == "testnet" ]];
+then
+extra_vers_desc="If you leave this empty, it will use the latest version."
+elif [[ $action == "mainnet" ]];
+then
+extra_vers_desc="If you leave this empty, the script will terminate."
+
+fi
+
+
+read -p "What version node software would you like to use. If you are on mainnet, or if you are an exchange, this should have been communicated to you from COTI. $extra_vers_desc. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
+
 
 # If we are on mainnet and a version isnt chosen, terminate the script
 if [[ $action == "mainnet" ]] && [[ $new_version_tag_final == "" ]];
 then
+echo "${RED}No version chosen.  Terminating script. ${COLOR_RESET}"
 exit 1
+elif [[ $action == "testnet" ]] && [[ $new_version_tag_final == "" ]];
+then
+echo "${YELLOW}No version chosen, that's ok, selecting latest version.${COLOR_RESET}"
+new_version_tag_final=$new_version_tag
 fi
 
-# If we are on mainnet and the user wrote 'latest' then it will pull the latest version!
-if [[ $action == "mainnet" ]] && [[ $new_version_tag_final == "latest" ]];
+
+# Finally if the user wrote 'latest' then it will pull the latest version!
+if [[ $new_version_tag_final == "latest" ]];
 then
 new_version_tag_final=$new_version_tag
 fi
 
-if [[ $portno == "" ]] || [[ $username == "" ]] || [[ $email == "" ]] || [[ $servername == "" ]] || [[ $pkey == "" ]] || [[ $seed == "" ]];
+
+
+if [[ $portno == "" ]] || [[ $username == "" ]] || [[ $email == "" ]] || [[ $servername == "" ]];
 then
-echo "Some details were not provided.  Script is now exiting.  Please run again and provide answers to all of the questions"
+echo "${RED}Some details were not provided.  Script is now exiting.  Please run again and provide answers to all of the questions${COLOR_RESET}"
 exit 1
+fi
+
+
+if [[ $pkey == "" ]] || [[ $seed == "" ]] && [[ $API_key = "" ]];
+then
+echo "${RED}Private Key or Seed Key was not provided. Please run again and provide answers to all of the questions ${COLOR_RESET}"
+exit 1
+fi
+
+
+
+
+if [[ $API_key != "" ]];
+then
+
+  # Its an exchange on mainnet.
+  #sudo apt-get install unzip
+  wget -O installkeygenerator.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/installkeygenerator.sh
+  chmod +x installkeygenerator.sh
+  working_dir=$(pwd);
+  read -n 1 -r -s -p $'Press enter to run installkeygenerator.sh...\n'
+  ./installkeygenerator.sh "$username"
+  read -n 1 -r -s -p $'Press enter to run app.js...\n'
+  node /home/$username/exchange-fullnode/app.js "$API_key" "$action" "" "$working_dir"
+
+  read -n 1 -r -s -p $'Press enter to discover variables from keys.json...\n'
+
+cat << "ATTENTIONEOF"
+
+ █████╗ ████████╗████████╗███████╗███╗   ██╗████████╗██╗ ██████╗ ███╗   ██╗
+██╔══██╗╚══██╔══╝╚══██╔══╝██╔════╝████╗  ██║╚══██╔══╝██║██╔═══██╗████╗  ██║
+███████║   ██║      ██║   █████╗  ██╔██╗ ██║   ██║   ██║██║   ██║██╔██╗ ██║
+██╔══██║   ██║      ██║   ██╔══╝  ██║╚██╗██║   ██║   ██║██║   ██║██║╚██╗██║
+██║  ██║   ██║      ██║   ███████╗██║ ╚████║   ██║   ██║╚██████╔╝██║ ╚████║
+╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+ATTENTIONEOF
+
+echo "${RED}PLEASE MAKE A SAFE COPY OF YOUR KEYS BELOW.  THIS IS YOUR ONLY OPPORTUNITY BEFORE WE DELETE THEM FROM DISK!! DO NOT SHARE THEM WITH ANYONE! ${COLOR_RESET}"
+
+read -n 1 -r -s -p $'Be prepared, press enter once to show you your seeds and private keys....\n'
+
+seed=$(cat "$working_dir/keys.json" | jq '.Seed')
+pkey=(cat "$working_dir/keys.json" | jq '.PrivateKey')
+mnemonic=(cat "$working_dir/keys.json" | jq '.Mnemonic')
+
+echo "SEED: $seed"
+echo "PRIVATE KEY: $pkey"
+echo "MNEMONIC: $mnemonic"
+
+read -n 1 -r -s -p $'Press enter to confirm you have copied down your PRIVATE information above...\n'
+rm $working_dir/keys.json
+read -n 1 -r -s -p $'Now press enter once more to continue...\n'
+
 fi
 
 
@@ -177,11 +251,20 @@ echo "$x"
 }
 
 typeset -fx pad64chars
+
+
+if [[ $seed != "" ]];
+then
 #Newly padded seed if needed
 seed=$(pad64chars $seed)
+fi
+
+if [[ $pkey != "" ]];
+then
 #Newly padded private key if needed
 pkey=$(pad64chars $pkey)
 
+fi
 # padding of seeds and key complete
 
 
