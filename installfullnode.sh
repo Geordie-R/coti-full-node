@@ -4,11 +4,7 @@ logging=false;
 
 set -eu -o pipefail # fail on error , debug all lines
 
-
-
-
 LOG_LOCATION=/root/
-
 
 if [[ $logging == true ]];
 then
@@ -21,15 +17,6 @@ apt-get update -y && apt-get upgrade -y
 #Install JQ which makes it easy to interpret JSON
 apt-get update -y
 apt-get install -y jq
-
-
-
-
-
-
-
-
-
 
 # For output readability
 RED=$(tput setaf 1)
@@ -48,10 +35,7 @@ echo "Latest version is $new_version_tag\n\n\n\n"
 
 shopt -s globstar dotglob
 
-
 cat << "MENUEOF"
-
-
 
 ███╗   ███╗███████╗███╗   ██╗██╗   ██╗
 ████╗ ████║██╔════╝████╗  ██║██║   ██║
@@ -59,7 +43,6 @@ cat << "MENUEOF"
 ██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
 ██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
 ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
-
 
 MENUEOF
 
@@ -99,14 +82,6 @@ break
 done
 
 
-
-
-
-
-
-
-
-
 echo "Welcome to the COTI Node Installer .  We will begin to ask you a series of questions.  Please have to hand:"
 echo "✅ Your SSH Port No"
 echo "✅ Your Ubuntu Username"
@@ -120,8 +95,6 @@ if [[ $action == "mainnet" ]];
 then
 echo "✅ What version of coti node you would like to use. Coti will communicate this to you. Write latest ONLY if they tell you to use latest commited version."
 fi
-
-
 
 read -n 1 -r -s -p $'Press enter to begin...\n'
 
@@ -155,7 +128,6 @@ extra_vers_desc="If you leave this empty, the script will terminate."
 
 fi
 
-
 read -p "What version node software would you like to use. If you are on mainnet, or if you are an exchange, this should have been communicated to you from COTI. $extra_vers_desc. If entering a version number, remember it takes this format: 1.4.1 ?: " new_version_tag_final
 
 
@@ -177,8 +149,6 @@ then
 new_version_tag_final=$new_version_tag
 fi
 
-
-
 if [[ $portno == "" ]] || [[ $username == "" ]] || [[ $email == "" ]] || [[ $servername == "" ]];
 then
 echo "${RED}Some details were not provided.  Script is now exiting.  Please run again and provide answers to all of the questions${COLOR_RESET}"
@@ -188,29 +158,26 @@ fi
 
 if [[ $pkey == "" ]] || [[ $seed == "" ]] && [[ $API_key = "" ]];
 then
-echo "${RED}Private Key or Seed Key was not provided. Please run again and provide answers to all of the questions ${COLOR_RESET}"
+echo "Private Key or Seed Key was not provided. Please run again and provide answers to all of the questions"
 exit 1
 fi
-
 
 
 
 if [[ $API_key != "" ]];
 then
 
+
+
   # Its an exchange on mainnet.
   #sudo apt-get install unzip
-  wget -O installkeygenerator.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/installkeygenerator.sh
+  wget -O installkeygenerator.sh "https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/installkeygenerator.sh"
   chmod +x installkeygenerator.sh
-  working_dir=$(pwd);
-  read -n 1 -r -s -p $'Press enter to run installkeygenerator.sh...\n'
+  working_dir=$(pwd)
   ./installkeygenerator.sh "$username"
-  read -n 1 -r -s -p $'Press enter to run app.js...\n'
-  node /home/$username/exchange-fullnode/app.js "$API_key" "$action" "" "$working_dir"
-
-  read -n 1 -r -s -p $'Press enter to discover variables from keys.json...\n'
 
 cat << "ATTENTIONEOF"
+
 
  █████╗ ████████╗████████╗███████╗███╗   ██╗████████╗██╗ ██████╗ ███╗   ██╗
 ██╔══██╗╚══██╔══╝╚══██╔══╝██╔════╝████╗  ██║╚══██╔══╝██║██╔═══██╗████╗  ██║
@@ -218,26 +185,51 @@ cat << "ATTENTIONEOF"
 ██╔══██║   ██║      ██║   ██╔══╝  ██║╚██╗██║   ██║   ██║██║   ██║██║╚██╗██║
 ██║  ██║   ██║      ██║   ███████╗██║ ╚████║   ██║   ██║╚██████╔╝██║ ╚████║
 ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+
+
 ATTENTIONEOF
 
-echo "${RED}PLEASE MAKE A SAFE COPY OF YOUR KEYS BELOW.  THIS IS YOUR ONLY OPPORTUNITY BEFORE WE DELETE THEM FROM DISK!! DO NOT SHARE THEM WITH ANYONE! ${COLOR_RESET}"
 
-read -n 1 -r -s -p $'Be prepared, press enter once to show you your seeds and private keys....\n'
+echo "running app.js"
 
-seed=$(cat "$working_dir/keys.json" | jq '.Seed')
-pkey=(cat "$working_dir/keys.json" | jq '.PrivateKey')
-mnemonic=(cat "$working_dir/keys.json" | jq '.Mnemonic')
+node /home/$username/exchange-fullnode/app.js "$API_key" "$action" "" "$(pwd)"
 
-echo "SEED: $seed"
-echo "PRIVATE KEY: $pkey"
-echo "MNEMONIC: $mnemonic"
 
-read -n 1 -r -s -p $'Press enter to confirm you have copied down your PRIVATE information above...\n'
-rm $working_dir/keys.json
-read -n 1 -r -s -p $'Now press enter once more to continue...\n'
+
+
+
+
+
+
+
+
+
+
+#echo "${RED}PLEASE MAKE A SAFE COPY OF YOUR SEEDS, PRIVATE KEYS AND MNEMONICS ABOVE.  THIS IS YOUR ONLY OPPORTUNITY BEFORE WE DELETE THEM FROM DISK!! DO NOT SHARE THEM WITH ANYONE! ${COLOR_RESET}"
+echo "sleeping for 10"
+sleep 10
+echo "continuing..."
+
+
+keyspath="$working_dir/keys.json"
+echo "keyspath: $keyspath"
+
+seed=$(cat "$keyspath" | jq -r '.[].Seed')
+pkey=$(cat "$keyspath" | jq -r '.[].PrivateKey')
+mnemonic=$(cat "$keyspath" | jq -r '.[].Mnemonic')
+
+echo "seed is $seed"
+sleep 1
+echo "pkey is $pkey"
+sleep 1
+echo "mnemonic is $mnemonic"
+sleep 1
+echo "done"
+
 
 fi
 
+echo "passed fi"
 
 #Lets pad the seeds
 
@@ -249,6 +241,12 @@ x="0"$x
 done
 echo "$x"
 }
+
+
+
+
+if [[ $API_key == "" ]];
+then
 
 typeset -fx pad64chars
 
@@ -265,8 +263,8 @@ then
 pkey=$(pad64chars $pkey)
 
 fi
+fi
 # padding of seeds and key complete
-
 
 
 exec 3<>/dev/tcp/ipv4.icanhazip.com/80
@@ -326,13 +324,20 @@ chown -R $username: /home/$username/coti-fullnode/
 cd /home/$username/coti-fullnode/
 sudo -u $username mvn initialize && sudo -u $username mvn clean compile && sudo -u $username mvn -Dmaven.test.skip=true package
 
-cat <<EOF >/home/$username/coti-fullnode/fullnode.properties
+
+logging_file_name="FullNode1";
+
+if [[ $action == "testnet" ]];
+then
+
+logging_file_name=FullNode1;
+cat <<EOF-TESTNET >/home/$username/coti-fullnode/fullnode.properties
 network=TestNet
 server.ip=$serverip
 server.port=7070
 server.url=$serverurl
 application.name=FullNode
-logging.file.name=FullNode1
+logging.file.name=$logging_file_name
 database.folder.name=rocksDB1
 resetDatabase=false
 global.private.key=$pkey
@@ -349,7 +354,39 @@ node.manager.propagation.port=10001
 allow.transaction.monitoring=true
 whitelist.ips=127.0.0.1,0:0:0:0:0:0:0:1
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
-EOF
+EOF-TESTNET
+
+elif [[ $action == "mainnet" ]];
+logging_file_name=FullNode3;
+cat <<EOF-MAINNET >/home/$username/coti-fullnode/fullnode.properties
+network=MainNet
+server.ip=$serverip
+server.port=7070
+server.url=$serverurl
+application.name=FullNode
+logging.file.name=$logging_file_name
+database.folder.name=rocksDB
+global.private.key=$pkey
+fullnode.seed=$seed
+minimumFee=0.01
+maximumFee=25
+fee.percentage=0.01
+zero.fee.user.hashes=
+kycserver.public.key=c10052a39b023c8d4a3fc406a74df1742599a387c58bcea2a2093bd85103f3bd22816fa45bbfb26c1f88a112f0c0b007755eb1be1fad3b45f153adbac4752638
+kycserver.url=https://cca.coti.io
+node.manager.ip=35.157.47.86
+node.manager.port=7090
+node.manager.propagation.port=10001
+node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
+EOF-MAINNET
+fi
+
+
+
+
+
+
+
 
 
 #IF mainnet lets download the dbrecovery and set db.restore to true!
