@@ -325,12 +325,12 @@ cd /home/$username/coti-fullnode/
 sudo -u $username mvn initialize && sudo -u $username mvn clean compile && sudo -u $username mvn -Dmaven.test.skip=true package
 
 
-logging_file_name="FullNode1";
+logging_file_name="";
 
 if [[ $action == "testnet" ]];
 then
 
-logging_file_name=FullNode1;
+logging_file_name="FullNode1";
 cat <<EOF-TESTNET >/home/$username/coti-fullnode/fullnode.properties
 network=TestNet
 server.ip=$serverip
@@ -357,7 +357,7 @@ node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871
 EOF-TESTNET
 
 elif [[ $action == "mainnet" ]];
-logging_file_name=FullNode3;
+logging_file_name="FullNode3";
 cat <<EOF-MAINNET >/home/$username/coti-fullnode/fullnode.properties
 network=MainNet
 server.ip=$serverip
@@ -397,18 +397,6 @@ chmod +x dbrecovery.sh
 ./dbrecovery.sh "true" "$username"
 fi
 
-
-
-
-
-
-FILE=/home/$username/coti-fullnode/FullNode1_clusterstamp.csv
-if [ -f "$FILE" ]; then
-    echo "$FILE already exists, no need to download"
-else
-    echo "$FILE does not exist, downloading now"
-    wget -q --show-progress --progress=bar:force 2>&1 https://www.dropbox.com/s/rpyercs56zmay0z/FullNode1_clusterstamp.csv -P /home/$username/coti-fullnode/
-fi
 
 
 #########################################
@@ -497,7 +485,7 @@ systemctl enable cnode.service
 systemctl start cnode.service
 echo "Waiting for Coti Node to Start"
 sleep 5
-tail -f /home/$username/coti-fullnode/logs/FullNode1.log | while read line; do
+tail -f /home/$username/coti-fullnode/logs/$logging_file_name.log | while read line; do
 echo $line
 echo ${GREEN}$line{COLOR_RESET}| grep -q 'COTI FULL NODE IS UP' && break;
 
