@@ -179,17 +179,6 @@ then
 cat << "ATTENTIONEOF"
 
 
- █████╗ ████████╗████████╗███████╗███╗   ██╗████████╗██╗ ██████╗ ███╗   ██╗
-██╔══██╗╚══██╔══╝╚══██╔══╝██╔════╝████╗  ██║╚══██╔══╝██║██╔═══██╗████╗  ██║
-███████║   ██║      ██║   █████╗  ██╔██╗ ██║   ██║   ██║██║   ██║██╔██╗ ██║
-██╔══██║   ██║      ██║   ██╔══╝  ██║╚██╗██║   ██║   ██║██║   ██║██║╚██╗██║
-██║  ██║   ██║      ██║   ███████╗██║ ╚████║   ██║   ██║╚██████╔╝██║ ╚████║
-╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
-
-
-ATTENTIONEOF
-
-
 echo "running app.js"
 
 node /home/$username/exchange-fullnode/app.js "$API_key" "$action" "" "$(pwd)"
@@ -218,18 +207,18 @@ seed=$(cat "$keyspath" | jq -r '.[].Seed')
 pkey=$(cat "$keyspath" | jq -r '.[].PrivateKey')
 mnemonic=$(cat "$keyspath" | jq -r '.[].Mnemonic')
 
-echo "seed is $seed"
-sleep 1
-echo "pkey is $pkey"
-sleep 1
-echo "mnemonic is $mnemonic"
-sleep 1
-echo "done"
+#echo "seed is $seed"
+#sleep 1
+#echo "pkey is $pkey"
+#sleep 1
+#echo "mnemonic is $mnemonic"
+#sleep 1
+#echo "done"
 
 
 fi
 
-echo "passed fi"
+#echo "passed fi"
 
 #Lets pad the seeds
 
@@ -248,21 +237,21 @@ echo "$x"
 if [[ $API_key == "" ]];
 then
 
-typeset -fx pad64chars
+  typeset -fx pad64chars
 
 
-if [[ $seed != "" ]];
-then
-#Newly padded seed if needed
-seed=$(pad64chars $seed)
-fi
+  if [[ $seed != "" ]];
+  then
+    #Newly padded seed if needed
+    seed=$(pad64chars $seed)
+  fi
 
-if [[ $pkey != "" ]];
-then
-#Newly padded private key if needed
-pkey=$(pad64chars $pkey)
+  if [[ $pkey != "" ]];
+  then
+    #Newly padded private key if needed
+    pkey=$(pad64chars $pkey)
 
-fi
+  fi
 fi
 # padding of seeds and key complete
 
@@ -315,7 +304,16 @@ mvn -version
 ufw limit $portno
 ufw allow 80
 ufw allow 443
-ufw allow 7070
+
+if [[ $action == "testnet" ]];
+then
+  ufw allow from 52.59.142.53 to any port 7070
+elif [[ $action == "mainnet" ]];
+then
+  ufw allow from 35.157.47.86 to any port 7070
+fi
+
+
 ufw --force enable
 
 cd /home/$username/
@@ -357,6 +355,7 @@ node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871
 EOF-TESTNET
 
 elif [[ $action == "mainnet" ]];
+then
 logging_file_name="FullNode3";
 cat <<EOF-MAINNET >/home/$username/coti-fullnode/fullnode.properties
 network=MainNet
@@ -392,7 +391,7 @@ fi
 #IF mainnet lets download the dbrecovery and set db.restore to true!
 if [[ $action == "mainnet" ]];
 then
-wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/dbrecovery.sh
+wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
 chmod +x dbrecovery.sh
 ./dbrecovery.sh "true" "$username"
 fi
