@@ -176,8 +176,6 @@ then
   working_dir=$(pwd)
   ./installkeygenerator.sh "$username"
 
-cat << "ATTENTIONEOF"
-
 
 echo "running app.js"
 
