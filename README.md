@@ -9,3 +9,15 @@ chmod +x installfullnode.sh
 ```
 
 
+# Coti Full Node Uninstall
+Please find below code to uninstall the coti full node on testnet and mainnet.  This is still under construction.
+
+```
+wget -O uninstallfullnode.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/uninstallfullnode.sh
+chmod +x uninstallfullnode.sh
+./uninstallfullnode.sh
+
+```
+
+
+
