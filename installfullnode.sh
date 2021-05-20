@@ -1,6 +1,6 @@
 #!/bin/bash
 
-logging=true;
+logging=false
 
 set -eu -o pipefail # fail on error , debug all lines
 
