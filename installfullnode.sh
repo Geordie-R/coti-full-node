@@ -1,6 +1,6 @@
 #!/bin/bash
 
-logging=false;
+logging=true;
 
 set -eu -o pipefail # fail on error , debug all lines
 
@@ -148,6 +148,8 @@ if [[ $new_version_tag_final == "latest" ]];
 then
 new_version_tag_final=$new_version_tag
 fi
+
+echo "Chosen version is $new_version_tag_final"
 
 if [[ $portno == "" ]] || [[ $username == "" ]] || [[ $email == "" ]] || [[ $servername == "" ]];
 then
@@ -315,7 +317,12 @@ fi
 ufw --force enable
 
 cd /home/$username/
-git clone https://github.com/coti-io/coti-fullnode.git
+#git clone https://github.com/coti-io/coti-fullnode.git
+
+git clone --depth 1 --branch $new_version_tag_final https://github.com/coti-io/coti-fullnode
+
+
+
 chown -R $username: /home/$username/coti-fullnode/
 cd /home/$username/coti-fullnode/
 sudo -u $username mvn initialize && sudo -u $username mvn clean compile && sudo -u $username mvn -Dmaven.test.skip=true package
@@ -482,7 +489,9 @@ systemctl enable cnode.service
 systemctl start cnode.service
 echo "Waiting for Coti Node to Start"
 sleep 5
-tail -f /home/$username/coti-fullnode/logs/$logging_file_name.log | while read line; do
+log_path="/home/$username/coti-fullnode/logs/$logging_file_name.log"
+echo "Viewing $log_path #<#<#"
+tail -f $log_path | while read line; do
 echo $line
 echo ${GREEN}$line{COLOR_RESET}| grep -q 'COTI FULL NODE IS UP' && break;
 
