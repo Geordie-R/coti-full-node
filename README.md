@@ -9,8 +9,8 @@ chmod +x installfullnode.sh
 ```
 
 
-# Coti Full Node API Retrieve Keys
-Are you an exchange and want to retrieve your seed and keys before deleting the keys file?
+# Coti Full Node - Retrieve Seed and Keys
+Are you an exchange that has used an API key whilst installing and want to retrieve your seed and keys before deleting the keys file? Run the following after you have ran the install above.
 
 ```
 wget -O getkeys.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/getkeys.sh
