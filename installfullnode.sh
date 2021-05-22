@@ -396,7 +396,7 @@ fi
 #IF mainnet lets download the dbrecovery and set db.restore to true!
 if [[ $action == "mainnet" ]];
 then
-wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
+wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/dbrecovery.sh
 chmod +x dbrecovery.sh
 ./dbrecovery.sh "true" "$username"
 fi
