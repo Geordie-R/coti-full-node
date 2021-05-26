@@ -1,6 +1,7 @@
 #!/bin/bash
 
 logging=false
+#If you turn logging on, be aware your gcnode.log may contain your keys!!
 
 set -eu -o pipefail # fail on error , debug all lines
 
@@ -23,15 +24,25 @@ RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 COLOR_RESET=$(tput sgr0)
+
+
+function removequotes(){
+  #Remove the front and end double quote
+  version=${1#"\""}
+  version=${version%"\""}
+  echo "$version"
+}
+
 new_version_tag_final=""
 new_version_tag=$(curl -s https://api.github.com/repos/coti-io/coti-node/releases/latest | jq ".tag_name")
-#Remove the front and end double quote
-new_version_tag=${new_version_tag#"\""}
-new_version_tag=${new_version_tag%"\""}
-API_key=""
-#new_version_tag=1.4.1 for example
 
-echo "Latest version is $new_version_tag\n\n\n\n"
+
+#Remove the front and end double quote
+new_version_tag=$(removequotes "$new_version_tag")
+
+API_key=""
+
+echo "Latest version is $new_version_tag"
 
 shopt -s globstar dotglob
 
@@ -396,8 +407,9 @@ fi
 #IF mainnet lets download the dbrecovery and set db.restore to true!
 if [[ $action == "mainnet" ]];
 then
-wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/dbrecovery.sh
+wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
 chmod +x dbrecovery.sh
+echo "Turning dbrecovery on"
 ./dbrecovery.sh "true" "$username"
 fi
 
@@ -408,16 +420,23 @@ fi
 #########################################
 
 FILE=/home/$username/coti-fullnode/FullNode1_clusterstamp.csv
-if [ -f "$FILE" ]; then
-    echo "${YELLOW}$FILE already exists, no need to download the clusterstamp file ${COLOR_RESET}"
-else
-    echo "${YELLOW}$FILE does not exist, downloading the clusterstamp now... ${COLOR_RESET}"
-    wget -q --show-progress --progress=bar:force 2>&1 https://www.dropbox.com/s/rpyercs56zmay0z/FullNode1_clusterstamp.csv -P /home/$username/coti-fullnode/
+
+cluster_url_mainnet="https://coti.tips/downloads/FullNode1_clusterstamp.csv"
+cluster_url_testnet="https://www.dropbox.com/s/rpyercs56zmay0z/FullNode1_clusterstamp.csv"
+
+
+if [[ $action == "testnet" ]];
+then
+ echo "${YELLOW}Downloading the clusterstamp now from ... ${COLOR_RESET}"
+wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_testnet  -P -O /home/$username/coti-fullnode/
+elif [[ $action == "mainnet" ]];
+wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_mainnet -P -O /home/$username/coti-fullnode/
+then
+
+
 fi
 
-
-
-
+echo "Applying chgrp and chown to clusterstamp and properties"
 chown $username /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
 chgrp $username /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
 chown $username /home/$username/coti-fullnode/fullnode.properties
@@ -493,15 +512,14 @@ log_path="/home/$username/coti-fullnode/logs/$logging_file_name.log"
 echo "Viewing $log_path #<#<#"
 tail -f $log_path | while read line; do
 echo $line
-echo ${GREEN}$line{COLOR_RESET}| grep -q 'COTI FULL NODE IS UP' && break;
+echo ${GREEN}$line${COLOR_RESET}| grep -q 'COTI FULL NODE IS UP!!' && break;
 
 done
 
 #IF mainnet lets set db.restore to false!
 if [[ $action == "mainnet" ]];
 then
+echo "Turning dbrecovery off"
 ./dbrecovery.sh "false" "$username"
 fi
 
-sleep 2
-echo "Your node is registered and running on the COTI Network"
