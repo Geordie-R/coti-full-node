@@ -1,6 +1,8 @@
 # Coti Full Node Install
 Please find below a working solution to run the coti full node on testnet, mainnet install is under construction. The latest version will be pulled down.
 
+I advise you to refer to this comprehensive manual here: https://geordier.gitbook.io/geordie-docs/
+
 ```
 rm -rf installfullnode.sh
 wget -O installfullnode.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/installfullnode.sh
