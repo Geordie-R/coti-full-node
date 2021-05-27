@@ -1,6 +1,6 @@
 #!/bin/bash
 
-logging=false
+logging=true
 #If you turn logging on, be aware your gcnode.log may contain your keys!!
 
 set -eu -o pipefail # fail on error , debug all lines
@@ -41,6 +41,7 @@ new_version_tag=$(curl -s https://api.github.com/repos/coti-io/coti-node/release
 new_version_tag=$(removequotes "$new_version_tag")
 
 API_key=""
+coti_dir=""
 
 echo "Latest version is $new_version_tag"
 
@@ -194,38 +195,12 @@ echo "running app.js"
 
 node /home/$username/exchange-fullnode/app.js "$API_key" "$action" "" "$(pwd)"
 
-
-
-
-
-
-
-
-
-
-
-
-#echo "${RED}PLEASE MAKE A SAFE COPY OF YOUR SEEDS, PRIVATE KEYS AND MNEMONICS ABOVE.  THIS IS YOUR ONLY OPPORTUNITY BEFORE WE DELETE THEM FROM DISK!! DO NOT SHARE THEM WITH ANYONE! ${COLOR_RESET}"
-echo "sleeping for 10"
-sleep 10
-echo "continuing..."
-
-
 keyspath="$working_dir/keys.json"
 echo "keyspath: $keyspath"
 
 seed=$(cat "$keyspath" | jq -r '.[].Seed')
 pkey=$(cat "$keyspath" | jq -r '.[].PrivateKey')
 mnemonic=$(cat "$keyspath" | jq -r '.[].Mnemonic')
-
-#echo "seed is $seed"
-#sleep 1
-#echo "pkey is $pkey"
-#sleep 1
-#echo "mnemonic is $mnemonic"
-#sleep 1
-#echo "done"
-
 
 fi
 
@@ -328,14 +303,13 @@ fi
 ufw --force enable
 
 cd /home/$username/
-#git clone https://github.com/coti-io/coti-fullnode.git
 
-git clone --depth 1 --branch $new_version_tag_final https://github.com/coti-io/coti-fullnode
-
+git clone --depth 1 --branch $new_version_tag_final https://github.com/coti-io/coti-node
 
 
-chown -R $username: /home/$username/coti-fullnode/
-cd /home/$username/coti-fullnode/
+
+chown -R $username: /home/$username/coti-node/
+cd /home/$username/coti-node/
 sudo -u $username mvn initialize && sudo -u $username mvn clean compile && sudo -u $username mvn -Dmaven.test.skip=true package
 
 
@@ -345,7 +319,7 @@ if [[ $action == "testnet" ]];
 then
 
 logging_file_name="FullNode1";
-cat <<EOF-TESTNET >/home/$username/coti-fullnode/fullnode.properties
+cat <<EOF-TESTNET >/home/$username/coti-node/fullnode.properties
 network=TestNet
 server.ip=$serverip
 server.port=7070
@@ -373,7 +347,7 @@ EOF-TESTNET
 elif [[ $action == "mainnet" ]];
 then
 logging_file_name="FullNode3";
-cat <<EOF-MAINNET >/home/$username/coti-fullnode/fullnode.properties
+cat <<EOF-MAINNET >/home/$username/coti-node/fullnode.properties
 network=MainNet
 server.ip=$serverip
 server.port=7070
@@ -407,7 +381,7 @@ fi
 #IF mainnet lets download the dbrecovery and set db.restore to true!
 if [[ $action == "mainnet" ]];
 then
-wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/v2.0/dbrecovery.sh
+wget -O dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/dbrecovery.sh
 chmod +x dbrecovery.sh
 echo "Turning dbrecovery on"
 ./dbrecovery.sh "true" "$username"
@@ -419,7 +393,7 @@ fi
 # Download Clusterstamp
 #########################################
 
-FILE=/home/$username/coti-fullnode/FullNode1_clusterstamp.csv
+FILE=/home/$username/coti-node/FullNode1_clusterstamp.csv
 
 cluster_url_mainnet="https://coti.tips/downloads/FullNode1_clusterstamp.csv"
 cluster_url_testnet="https://www.dropbox.com/s/rpyercs56zmay0z/FullNode1_clusterstamp.csv"
@@ -428,19 +402,17 @@ cluster_url_testnet="https://www.dropbox.com/s/rpyercs56zmay0z/FullNode1_cluster
 if [[ $action == "testnet" ]];
 then
  echo "${YELLOW}Downloading the clusterstamp now from ... ${COLOR_RESET}"
-wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_testnet  -P -O /home/$username/coti-fullnode/
+wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_testnet  -P -O /home/$username/coti-node/
 elif [[ $action == "mainnet" ]];
-wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_mainnet -P -O /home/$username/coti-fullnode/
 then
-
-
+wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_mainnet -P -O /home/$username/coti-node/
 fi
 
 echo "Applying chgrp and chown to clusterstamp and properties"
-chown $username /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
-chgrp $username /home/$username/coti-fullnode/FullNode1_clusterstamp.csv
-chown $username /home/$username/coti-fullnode/fullnode.properties
-chgrp $username /home/$username/coti-fullnode/fullnode.properties
+chown $username /home/$username/coti-node/FullNode1_clusterstamp.csv
+chgrp $username /home/$username/coti-node/FullNode1_clusterstamp.csv
+chown $username /home/$username/coti-node/fullnode.properties
+chgrp $username /home/$username/coti-node/fullnode.properties
 
 
 certbot certonly --nginx --non-interactive --agree-tos -m $email -d $servername
@@ -493,8 +465,8 @@ cat <<EOF >/etc/systemd/system/cnode.service
 [Unit]
 Description=COTI Fullnode Service
 [Service]
-WorkingDirectory=/home/$username/coti-fullnode/
-ExecStart=/usr/bin/java -Xmx256m -jar /home/$username/coti-fullnode/fullnode/target/fullnode-$new_version_tag_final.RELEASE.jar --spring.config.additional-location=fullnode.properties
+WorkingDirectory=/home/$username/coti-node/
+ExecStart=/usr/bin/java -Xmx256m -jar /home/$username/coti-node/fullnode/target/fullnode-$new_version_tag_final.RELEASE.jar --spring.config.additional-location=fullnode.properties
 SuccessExitStatus=143
 User=$username
 Restart=on-failure
@@ -508,7 +480,7 @@ systemctl enable cnode.service
 systemctl start cnode.service
 echo "Waiting for Coti Node to Start"
 sleep 5
-log_path="/home/$username/coti-fullnode/logs/$logging_file_name.log"
+log_path="/home/$username/coti-node/logs/$logging_file_name.log"
 echo "Viewing $log_path #<#<#"
 tail -f $log_path | while read line; do
 echo $line
@@ -522,4 +494,3 @@ then
 echo "Turning dbrecovery off"
 ./dbrecovery.sh "false" "$username"
 fi
-
