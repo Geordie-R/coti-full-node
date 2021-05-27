@@ -20,9 +20,9 @@ fi
 
 if [[ $user_name == "root" ]];
 then
-config_file="/root/coti-fullnode/fullnode.properties"
+config_file="/root/coti-node/fullnode.properties"
 else
-config_file="/home/$user_name/coti-fullnode/fullnode.properties"
+config_file="/home/$user_name/coti-node/fullnode.properties"
 fi
 
 
