@@ -6,6 +6,7 @@ logging=true
 set -eu -o pipefail # fail on error , debug all lines
 
 LOG_LOCATION=/root/
+node_folder="coti-fullnode"
 
 if [[ $logging == true ]];
 then
@@ -34,7 +35,7 @@ function removequotes(){
 }
 
 new_version_tag_final=""
-new_version_tag=$(curl -s https://api.github.com/repos/coti-io/coti-node/releases/latest | jq ".tag_name")
+new_version_tag=$(curl -s https://api.github.com/repos/coti-io/$node_folder/releases/latest | jq ".tag_name")
 
 
 #Remove the front and end double quote
@@ -180,17 +181,12 @@ fi
 
 if [[ $API_key != "" ]];
 then
-
-
-
   # Its an exchange on mainnet.
   #sudo apt-get install unzip
   wget -O installkeygenerator.sh "https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/installkeygenerator.sh"
   chmod +x installkeygenerator.sh
   working_dir=$(pwd)
   ./installkeygenerator.sh "$username"
-
-
 echo "running app.js"
 
 node /home/$username/exchange-fullnode/app.js "$API_key" "$action" "" "$(pwd)"
@@ -216,9 +212,6 @@ x="0"$x
 done
 echo "$x"
 }
-
-
-
 
 if [[ $API_key == "" ]];
 then
@@ -262,15 +255,9 @@ else
         adduser --gecos "" --disabled-password $username
         adduser $username sudo
 
-
-
 fi
 
-
-
-
 apt-get update -y && sudo apt-get upgrade -y
-
 
 echo "Installing prereqs..."
  sudo apt-get install \
@@ -282,6 +269,7 @@ echo "Installing prereqs..."
 
 apt-get update -y && sudo apt-get upgrade -y
 
+#curl -L -b "oraclelicense=a" -O https://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-linux-x64.rpm
 
 apt install openjdk-8-jdk maven nginx certbot python-certbot-nginx ufw nano git -y
 java -version
@@ -304,12 +292,10 @@ ufw --force enable
 
 cd /home/$username/
 
-git clone --depth 1 --branch $new_version_tag_final https://github.com/coti-io/coti-node
+git clone --depth 1 --branch $new_version_tag_final https://github.com/coti-io/$node_folder/
 
-
-
-chown -R $username: /home/$username/coti-node/
-cd /home/$username/coti-node/
+chown -R $username: /home/$username/$node_folder/
+cd /home/$username/$node_folder/
 sudo -u $username mvn initialize && sudo -u $username mvn clean compile && sudo -u $username mvn -Dmaven.test.skip=true package
 
 
@@ -319,7 +305,7 @@ if [[ $action == "testnet" ]];
 then
 
 logging_file_name="FullNode1";
-cat <<EOF-TESTNET >/home/$username/coti-node/fullnode.properties
+cat <<EOF-TESTNET >/home/$username/$node_folder/fullnode.properties
 network=TestNet
 server.ip=$serverip
 server.port=7070
@@ -370,14 +356,6 @@ node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871
 EOF-MAINNET
 fi
 
-
-
-
-
-
-
-
-
 #IF mainnet lets download the dbrecovery and set db.restore to true!
 if [[ $action == "mainnet" ]];
 then
@@ -393,27 +371,27 @@ fi
 # Download Clusterstamp
 #########################################
 
-FILE=/home/$username/coti-node/FullNode1_clusterstamp.csv
+FILE=/home/$username/$node_folder/FullNode1_clusterstamp.csv
 
 cluster_url_mainnet="https://coti.tips/downloads/FullNode1_clusterstamp.csv"
 cluster_url_testnet="https://www.dropbox.com/s/rpyercs56zmay0z/FullNode1_clusterstamp.csv"
 
-
 if [[ $action == "testnet" ]];
 then
  echo "${YELLOW}Downloading the clusterstamp now from ... ${COLOR_RESET}"
-wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_testnet  -P -O /home/$username/coti-node/
+wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_testnet  -P -O /home/$username/$node_folder/
 elif [[ $action == "mainnet" ]];
 then
-wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_mainnet -P -O /home/$username/coti-node/
+wget -q --show-progress --progress=bar:force 2>&1 $cluster_url_mainnet -P -O /home/$username/$node_folder/
 fi
 
 echo "Applying chgrp and chown to clusterstamp and properties"
-chown $username /home/$username/coti-node/FullNode1_clusterstamp.csv
-chgrp $username /home/$username/coti-node/FullNode1_clusterstamp.csv
-chown $username /home/$username/coti-node/fullnode.properties
-chgrp $username /home/$username/coti-node/fullnode.properties
+chown $username /home/$username/$node_folder/FullNode1_clusterstamp.csv
+chgrp $username /home/$username/$node_folder/FullNode1_clusterstamp.csv
+chown $username /home/$username/$node_folder/fullnode.properties
+chgrp $username /home/$username/$node_folder/fullnode.properties
 
+#NGINX Setup
 
 certbot certonly --nginx --non-interactive --agree-tos -m $email -d $servername
 
@@ -461,12 +439,15 @@ sed -i "s:ssl_key:ssl_certificate_key /etc/letsencrypt/live/$servername/privkey.
 
 service nginx restart
 
+
+#SYSTEMD service to run the node
+
 cat <<EOF >/etc/systemd/system/cnode.service
 [Unit]
 Description=COTI Fullnode Service
 [Service]
-WorkingDirectory=/home/$username/coti-node/
-ExecStart=/usr/bin/java -Xmx256m -jar /home/$username/coti-node/fullnode/target/fullnode-$new_version_tag_final.RELEASE.jar --spring.config.additional-location=fullnode.properties
+WorkingDirectory=/home/$username/$node_folder/
+ExecStart=/usr/bin/java -Xmx256m -jar /home/$username/$node_folder/fullnode/target/fullnode-$new_version_tag_final.RELEASE.jar --spring.config.additional-location=fullnode.properties
 SuccessExitStatus=143
 User=$username
 Restart=on-failure
@@ -480,7 +461,7 @@ systemctl enable cnode.service
 systemctl start cnode.service
 echo "Waiting for Coti Node to Start"
 sleep 5
-log_path="/home/$username/coti-node/logs/$logging_file_name.log"
+log_path="/home/$username/$node_folder/logs/$logging_file_name.log"
 echo "Viewing $log_path #<#<#"
 tail -f $log_path | while read line; do
 echo $line
