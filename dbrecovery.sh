@@ -2,6 +2,8 @@
 #Args incoming
 resetarg=$1
 user_name_arg=$2
+node_folder="coti-fullnode"
+
 
 #Parameters
 restore_hash_param=8eeae832927ed4a95cac73ede5c8b3082e6d3c16c5f98a97d6a7f3fa5b9c8ac364b5e7e8c1cf8d8b09bb23003e4029205d0946d676c6c907d6dccbe35dcbac7b
@@ -20,9 +22,9 @@ fi
 
 if [[ $user_name == "root" ]];
 then
-config_file="/root/coti-node/fullnode.properties"
+config_file="/root/$node_folder/fullnode.properties"
 else
-config_file="/home/$user_name/coti-node/fullnode.properties"
+config_file="/home/$user_name/$node_folder/fullnode.properties"
 fi
 
 
