@@ -20,12 +20,8 @@ fi
 
 
 
-if [[ $user_name == "root" ]];
-then
-config_file="/root/$node_folder/fullnode.properties"
-else
 config_file="/home/$user_name/$node_folder/fullnode.properties"
-fi
+
 
 
 
