@@ -1,6 +1,6 @@
 #!/bin/bash
 
-logging=true
+logging=false
 #If you turn logging on, be aware your gcnode.log may contain your keys!!
 
 set -eu -o pipefail # fail on error , debug all lines
@@ -333,7 +333,7 @@ EOF-TESTNET
 elif [[ $action == "mainnet" ]];
 then
 logging_file_name="FullNode3";
-cat <<EOF-MAINNET >/home/$username/coti-node/fullnode.properties
+cat <<EOF-MAINNET >/home/$username/$node_folder/fullnode.properties
 network=MainNet
 server.ip=$serverip
 server.port=7070
