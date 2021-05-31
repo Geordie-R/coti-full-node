@@ -178,6 +178,22 @@ exit 1
 fi
 
 
+#########################################
+# Create $username user if needed (Recently Moved)
+#########################################
+
+if id "$username" >/dev/null 2>&1; then
+        echo "user exists"
+else
+        echo "user does not exist...creating"
+        adduser --gecos "" --disabled-password $username
+        adduser $username sudo
+
+fi
+
+####################################
+# Create keys , seeds and mnemonics
+####################################
 
 if [[ $API_key != "" ]];
 then
@@ -244,18 +260,6 @@ done <&3
 
 serverurl=https://$servername
 
-#########################################
-# Create $username user if needed
-#########################################
-
-if id "$username" >/dev/null 2>&1; then
-        echo "user exists"
-else
-        echo "user does not exist...creating"
-        adduser --gecos "" --disabled-password $username
-        adduser $username sudo
-
-fi
 
 apt-get update -y && sudo apt-get upgrade -y
 
