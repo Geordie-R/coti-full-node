@@ -328,6 +328,7 @@ node.manager.propagation.port=10001
 allow.transaction.monitoring=true
 whitelist.ips=127.0.0.1,0:0:0:0:0:0:0:1
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
+allow.transaction.monitoring=true
 EOF-TESTNET
 
 elif [[ $action == "mainnet" ]];
@@ -353,6 +354,7 @@ node.manager.ip=35.157.47.86
 node.manager.port=7090
 node.manager.propagation.port=10001
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
+allow.transaction.monitoring=true
 EOF-MAINNET
 fi
 
