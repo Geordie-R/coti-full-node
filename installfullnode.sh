@@ -337,7 +337,7 @@ EOF-TESTNET
 
 elif [[ $action == "mainnet" ]];
 then
-logging_file_name="FullNode3";
+logging_file_name="FullNode1";
 cat <<EOF-MAINNET >/home/$username/$node_folder/fullnode.properties
 network=MainNet
 server.ip=$serverip
@@ -392,7 +392,6 @@ then
 echo "${YELLOW}Downloading the mainnet clusterstamp now from ... ${COLOR_RESET}"
 #  wget "$FILE" $cluster_url_mainnet
   wget --show-progress --progress=bar:force 2>&1 $cluster_url_mainnet -P /home/$username/$node_folder/
-  \cp /home/$username/$node_folder/FullNode1_clusterstamp.csv /home/$username/$node_folder/FullNode3_clusterstamp.csv
 fi
 
 echo "Applying chgrp and chown to clusterstamp and properties"
