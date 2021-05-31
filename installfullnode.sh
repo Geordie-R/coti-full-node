@@ -1,6 +1,6 @@
 #!/bin/bash
 
-logging=true
+logging=false
 #If you turn logging on, be aware your gcnode.log may contain your keys!!
 
 set -eu -o pipefail # fail on error , debug all lines
