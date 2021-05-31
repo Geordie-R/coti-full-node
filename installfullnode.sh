@@ -1,6 +1,6 @@
 #!/bin/bash
 
-logging=false
+logging=true
 #If you turn logging on, be aware your gcnode.log may contain your keys!!
 
 set -eu -o pipefail # fail on error , debug all lines
@@ -364,7 +364,7 @@ then
 wget -O /home/$username/dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/dbrecovery.sh
 chmod +x /home/$username/dbrecovery.sh
 echo "Turning dbrecovery on"
-/home/$username/dbrecovery.sh "true" "$username"
+/home/$username/dbrecovery.sh "true" "$username" "$action"
 fi
 
 echo "Moving on to clusterstamp"
@@ -481,5 +481,5 @@ done
 if [[ $action == "mainnet" ]];
 then
 echo "Turning dbrecovery off"
-/home/$username/dbrecovery.sh "false" "$username"
+/home/$username/dbrecovery.sh "false" "$username" "$action"
 fi
