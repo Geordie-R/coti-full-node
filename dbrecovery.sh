@@ -2,11 +2,23 @@
 #Args incoming
 resetarg=$1
 user_name_arg=$2
+mainnet_or_testnet=$3
 node_folder="coti-fullnode"
 
 
 #Parameters
+
+
+if [[ $mainnet_or_testnet == "testnet" ]];
+then
 restore_hash_param=8eeae832927ed4a95cac73ede5c8b3082e6d3c16c5f98a97d6a7f3fa5b9c8ac364b5e7e8c1cf8d8b09bb23003e4029205d0946d676c6c907d6dccbe35dcbac7b
+elif [[ $mainnet_or_testnet == "mainnet" ]];
+then
+restore_hash_param=d457ab0521089b668155fb5302268a2aa83c5964592def476dcbdcc787f47e5935ed007518f1706c558d2f709872950d33a5738a616a0416e044281a3583aa68
+fi
+
+
+
 restore_source_param=Remote
 
 
