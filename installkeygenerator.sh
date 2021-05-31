@@ -17,4 +17,4 @@ sudo apt-get install -y nodejs
 
 cd $path/exchange-fullnode
 npm install
-rm $filepath
+rm -rf $filepath 2> /dev/null
