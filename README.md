@@ -1,5 +1,5 @@
 # Coti Full Node Install
-Please find below a working solution to run the coti full node on testnet, mainnet install is under construction. The latest version will be pulled down.
+Please find below a working solution to run the coti full node on testnet and mainnet. The latest version will be pulled down. Mainnet and exchange users should be provided with a version number so they should use that.
 
 I advise you to refer to this comprehensive manual here: https://geordier.gitbook.io/geordie-docs/
 
