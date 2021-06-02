@@ -27,7 +27,7 @@ chmod +x getkeysthendelete.sh
 
 
 # Coti Full Node Uninstall
-Please find below code to uninstall the coti full node on testnet and mainnet.  This is still under construction but seems to be fine.
+Please find below code to uninstall the coti full node on testnet and mainnet.
 
 ```
 rm -rf uninstallfullnode.sh
