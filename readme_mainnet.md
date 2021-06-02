@@ -1,6 +1,6 @@
 # COTI Mainnet Readme
 
-For the manual for this please see this link (https://app.gitbook.com/@geordier/s/geordie-docs/installing-the-node/installing-a-node)
+For the manual for this please see this link (https://geordier.gitbook.io/geordie-docs/installing-the-node/installing-a-node)
 
 ```
 rm -rf installfullnode.sh
