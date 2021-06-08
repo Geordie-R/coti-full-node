@@ -4,7 +4,7 @@ For the manual for this please see this link (https://geordier.gitbook.io/geordi
 
 ```
 rm -rf installfullnode.sh
-wget -O installfullnode.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/installfullnode.sh
+wget -O installfullnode.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/main/installfullnode.sh
 chmod +x installfullnode.sh
 ./installfullnode.sh
 ```
