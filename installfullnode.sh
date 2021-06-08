@@ -199,7 +199,7 @@ if [[ $API_key != "" ]];
 then
   # Its an exchange on mainnet.
   #sudo apt-get install unzip
-  wget -O installkeygenerator.sh "https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/installkeygenerator.sh"
+  wget -O installkeygenerator.sh "https://raw.githubusercontent.com/Geordie-R/coti-full-node/main/installkeygenerator.sh"
   chmod +x installkeygenerator.sh
   working_dir=$(pwd)
   ./installkeygenerator.sh "$username"
@@ -365,7 +365,7 @@ fi
 #IF mainnet lets download the dbrecovery and set db.restore to true!
 if [[ $action == "REMOVEDmainnet" ]];
 then
-wget -O /home/$username/dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/New-API-Integration-v1/dbrecovery.sh
+wget -O /home/$username/dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/main/dbrecovery.sh
 chmod +x /home/$username/dbrecovery.sh
 echo "Turning dbrecovery on"
 /home/$username/dbrecovery.sh "true" "$username" "$action"
