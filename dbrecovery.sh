@@ -32,6 +32,7 @@ fi
 
 
 
+
 config_file="/home/$user_name/$node_folder/fullnode.properties"
 
 
