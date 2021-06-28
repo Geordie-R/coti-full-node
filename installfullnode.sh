@@ -275,8 +275,42 @@ apt-get update -y && sudo apt-get upgrade -y
 
 #curl -L -b "oraclelicense=a" -O https://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-linux-x64.rpm
 
-apt install openjdk-8-jdk maven nginx certbot python-certbot-nginx ufw nano git -y
+wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "https://download.oracle.com/otn-pub/java/jdk/8u291-b10/d7fc238d0cbf4b0dac67be84580cfb4b/jdk-8u291-linux-x64.tar.gz"
+mkdir /opt/java-jdk
+tar -C /opt/java-jdk -zxf jdk-8u291-linux-x64.tar.gz
+update-alternatives --install /usr/bin/java java /opt/java-jdk/jdk1.8.0_291/bin/java 1
+update-alternatives --install /usr/bin/javac javac /opt/java-jdk/jdk1.8.0_291/bin/javac 1
+echo "## JAVA VERSION START ##"
 java -version
+echo "## JAVA VERSION END ##"
+
+
+echo "## Installing maven 3.5.4 START ##"
+wget https://downloads.apache.org/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+mkdir /opt/apache-maven-3.5.4/
+tar -C /opt/ -zxf apache-maven-3.5.4-bin.tar.gz
+echo "## Installing maven 3.5.4 END ##"
+
+sudo ln -s /opt/apache-maven-3.5.4 /opt/maven
+count_maven=$(grep -i "maven" -c /etc/profile.d/maven.sh)
+
+
+
+if [[ ! -z "$count_maven" ]] || [[ $count_maven -eq 0 ]];
+then
+#maven variables do NOT exist
+
+echo "export M2_HOME=/opt/maven" >> /etc/profile.d/maven.sh
+echo "export MAVEN_HOME=/opt/maven" >> /etc/profile.d/maven.sh
+echo "export PATH=${M2_HOME}/bin:$PATH" >> /etc/profile.d/maven.sh
+fi
+chmod +x /etc/profile.d/maven.sh
+source /etc/profile.d/maven.sh
+
+
+
+
+apt install nginx certbot python-certbot-nginx ufw nano git -y
 mvn -version
 
 ufw limit $portno
@@ -363,7 +397,7 @@ EOF-MAINNET
 fi
 
 #IF mainnet lets download the dbrecovery and set db.restore to true!
-if [[ $action == "REMOVEDmainnet" ]];
+if [[ $action == "mainnet" ]];
 then
 wget -O /home/$username/dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/main/dbrecovery.sh
 chmod +x /home/$username/dbrecovery.sh
@@ -482,7 +516,7 @@ echo ${GREEN}$line${COLOR_RESET}| grep -q 'COTI FULL NODE IS UP!!' && break;
 done
 
 #IF mainnet lets set db.restore to false!
-if [[ $action == "REMOVEDmainnet" ]];
+if [[ $action == "mainnet" ]];
 then
 echo "Turning dbrecovery off"
 /home/$username/dbrecovery.sh "false" "$username" "$action"
