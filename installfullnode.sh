@@ -363,7 +363,7 @@ EOF-MAINNET
 fi
 
 #IF mainnet lets download the dbrecovery and set db.restore to true!
-if [[ $action == "REMOVEDmainnet" ]];
+if [[ $action == "mainnet" ]];
 then
 wget -O /home/$username/dbrecovery.sh https://raw.githubusercontent.com/Geordie-R/coti-full-node/main/dbrecovery.sh
 chmod +x /home/$username/dbrecovery.sh
@@ -482,7 +482,7 @@ echo ${GREEN}$line${COLOR_RESET}| grep -q 'COTI FULL NODE IS UP!!' && break;
 done
 
 #IF mainnet lets set db.restore to false!
-if [[ $action == "REMOVEDmainnet" ]];
+if [[ $action == "mainnet" ]];
 then
 echo "Turning dbrecovery off"
 /home/$username/dbrecovery.sh "false" "$username" "$action"
