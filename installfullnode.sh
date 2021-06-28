@@ -285,10 +285,32 @@ java -version
 echo "## JAVA VERSION END ##"
 
 
+echo "## Installing maven 3.5.4 START ##"
+wget https://downloads.apache.org/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+mkdir /opt/apache-maven-3.5.4/
+tar -C /opt/ -zxf apache-maven-3.5.4-bin.tar.gz
+echo "## Installing maven 3.5.4 END ##"
+
+sudo ln -s /opt/apache-maven-3.5.4 /opt/maven
+count_maven=$(grep -i "maven" -c /etc/profile.d/maven.sh)
 
 
 
-apt install maven nginx certbot python-certbot-nginx ufw nano git -y
+if [[ ! -z "$count_maven" ]] || [[ $count_maven -eq 0 ]];
+then
+#maven variables do NOT exist
+
+echo "export M2_HOME=/opt/maven" >> /etc/profile.d/maven.sh
+echo "export MAVEN_HOME=/opt/maven" >> /etc/profile.d/maven.sh
+echo "export PATH=${M2_HOME}/bin:$PATH" >> /etc/profile.d/maven.sh
+fi
+chmod +x /etc/profile.d/maven.sh
+source /etc/profile.d/maven.sh
+
+
+
+
+apt install nginx certbot python-certbot-nginx ufw nano git -y
 mvn -version
 
 ufw limit $portno
