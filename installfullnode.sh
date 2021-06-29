@@ -292,7 +292,18 @@ tar -C /opt/ -zxf apache-maven-3.5.4-bin.tar.gz
 echo "## Installing maven 3.5.4 END ##"
 
 sudo ln -s /opt/apache-maven-3.5.4 /opt/maven
+
+
+
+if [[ ! -e /etc/profile.d/maven.sh ]]; then
+    touch /etc/profile.d/maven.sh
+fi
+
+
+
 count_maven=$(grep -i "maven" -c /etc/profile.d/maven.sh)
+
+
 
 
 
