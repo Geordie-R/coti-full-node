@@ -275,7 +275,7 @@ apt-get update -y && sudo apt-get upgrade -y
 
 #curl -L -b "oraclelicense=a" -O https://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-linux-x64.rpm
 
-wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "https://download.oracle.com/otn-pub/java/jdk/8u291-b10/d7fc238d0cbf4b0dac67be84580cfb4b/jdk-8u291-linux-x64.tar.gz"
+wget --continue --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "https://download.oracle.com/otn-pub/java/jdk/8u291-b10/d7fc238d0cbf4b0dac67be84580cfb4b/jdk-8u291-linux-x64.tar.gz"
 mkdir -p /opt/java-jdk
 tar -C /opt/java-jdk -zxf jdk-8u291-linux-x64.tar.gz
 update-alternatives --install /usr/bin/java java /opt/java-jdk/jdk1.8.0_291/bin/java 1
@@ -286,43 +286,42 @@ echo "## JAVA VERSION END ##"
 
 
 echo "## Installing maven 3.5.4 START ##"
-wget https://downloads.apache.org/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+wget -c https://downloads.apache.org/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
 mkdir -p /opt/apache-maven-3.5.4/
 tar -C /opt/ -zxf apache-maven-3.5.4-bin.tar.gz
 echo "## Installing maven 3.5.4 END ##"
-
-sudo ln -s /opt/apache-maven-3.5.4 /opt/maven
-
+echo "A"
+sudo ln -sf /opt/apache-maven-3.5.4 /opt/maven
+echo "B"
 
 
 if [[ ! -e /etc/profile.d/maven.sh ]]; then
+echo "Creating /etc/profile.d/maven.sh"
     touch /etc/profile.d/maven.sh
 fi
 
-
-
-count_maven=$(grep -i "maven" -c /etc/profile.d/maven.sh)
-
+echo "C"
 
 
 
+echo "D"
 
-if [[ ! -z "$count_maven" ]] || [[ $count_maven -eq 0 ]];
-then
-#maven variables do NOT exist
+rm -f /etc/profile.d/maven.sh
 
+echo "Creating environment variables in /etc/profile.d/maven.sh"
 echo "export M2_HOME=/opt/maven" >> /etc/profile.d/maven.sh
 echo "export MAVEN_HOME=/opt/maven" >> /etc/profile.d/maven.sh
-echo "export PATH=${M2_HOME}/bin:$PATH" >> /etc/profile.d/maven.sh
-fi
+echo "export PATH=/opt/maven/bin:$PATH" >> /etc/profile.d/maven.sh
+
 chmod +x /etc/profile.d/maven.sh
 source /etc/profile.d/maven.sh
-
-
-
+sleep 2
+source /etc/profile.d/maven.sh
+sleep 2
+mvn -version
+echo "Installing nginx certbot python-certbot-nginx ufw nano git..."
 
 apt install nginx certbot python-certbot-nginx ufw nano git -y
-mvn -version
 
 ufw limit $portno
 ufw allow 80
@@ -345,7 +344,7 @@ git clone --depth 1 --branch $new_version_tag_final https://github.com/coti-io/$
 
 chown -R $username: /home/$username/$node_folder/
 cd /home/$username/$node_folder/
-sudo -u $username mvn initialize && sudo -u $username mvn clean compile && sudo -u $username mvn -Dmaven.test.skip=true package
+mvn initialize && mvn clean compile && mvn -Dmaven.test.skip=true package
 
 
 logging_file_name="";
