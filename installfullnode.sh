@@ -503,7 +503,7 @@ cat <<EOF >/etc/systemd/system/cnode.service
 Description=COTI Fullnode Service
 [Service]
 WorkingDirectory=/home/$username/$node_folder/
-ExecStart=/usr/bin/java -Xmx2048M -Xms2048m -XX:MaxPermSize=256M -jar /home/$username/$node_folder/fullnode/target/fullnode-$new_version_tag_final.RELEASE.jar --spring.config.additional-location=fullnode.properties
+ExecStart=/usr/bin/java -jar /home/$username/$node_folder/fullnode/target/fullnode-$new_version_tag_final.RELEASE.jar --spring.config.additional-location=fullnode.properties
 SuccessExitStatus=143
 User=$username
 Restart=on-failure
