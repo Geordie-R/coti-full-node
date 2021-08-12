@@ -275,7 +275,7 @@ apt-get update -y && sudo apt-get upgrade -y
 
 #curl -L -b "oraclelicense=a" -O https://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-linux-x64.rpm
 
-wget --continue --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "https://download.oracle.com/otn-pub/java/jdk/8u291-b10/d7fc238d0cbf4b0dac67be84580cfb4b/jdk-8u291-linux-x64.tar.gz"
+wget -c https://coti.tips/downloads/jdk-8u291-linux-x64.tar.gz
 mkdir -p /opt/java-jdk
 tar -C /opt/java-jdk -zxf jdk-8u291-linux-x64.tar.gz
 update-alternatives --install /usr/bin/java java /opt/java-jdk/jdk1.8.0_291/bin/java 1
