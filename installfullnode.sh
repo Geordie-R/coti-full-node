@@ -1,6 +1,8 @@
 #!/bin/bash
 
 logging=false
+
+
 #If you turn logging on, be aware your gcnode.log may contain your keys!!
 
 set -eu -o pipefail # fail on error , debug all lines
@@ -40,11 +42,11 @@ new_version_tag=$(curl -s https://api.github.com/repos/coti-io/$node_folder/rele
 
 #Remove the front and end double quote
 new_version_tag=$(removequotes "$new_version_tag")
-
+testnet_version = "1.5.0"
 API_key=""
 coti_dir=""
 
-echo "Latest version is $new_version_tag"
+echo "Latest version for mainnet is $new_version_tag"
 
 shopt -s globstar dotglob
 
@@ -152,7 +154,7 @@ exit 1
 elif [[ $action == "testnet" ]] && [[ $new_version_tag_final == "" ]];
 then
 echo "${YELLOW}No version chosen, that's ok, selecting latest version.${COLOR_RESET}"
-new_version_tag_final=$new_version_tag
+new_version_tag_final=$testnet_version
 fi
 
 
