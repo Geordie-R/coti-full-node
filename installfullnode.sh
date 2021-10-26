@@ -42,7 +42,7 @@ new_version_tag=$(curl -s https://api.github.com/repos/coti-io/$node_folder/rele
 
 #Remove the front and end double quote
 new_version_tag=$(removequotes "$new_version_tag")
-testnet_version="1.5.0"
+testnet_version="2.0.0"
 API_key=""
 coti_dir=""
 
