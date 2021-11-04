@@ -1,4 +1,4 @@
-# Coti Full Node Install
+# Coti Full Node Install For 20.04 compatability
 Please find below a working solution to run the coti full node on testnet and mainnet. The latest version will be pulled down. Mainnet and exchange users should be provided with a version number so they should use that.
 
 I advise you to refer to this comprehensive manual here: https://geordier.gitbook.io/geordie-docs/
