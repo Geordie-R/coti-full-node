@@ -321,9 +321,9 @@ sleep 2
 source /etc/profile.d/maven.sh
 sleep 2
 mvn -version
-echo "Installing nginx certbot python-certbot-nginx ufw nano git..."
+echo "Installing nginx certbot python3-certbot-nginx ufw nano git..."
 
-apt install nginx certbot python-certbot-nginx ufw nano git -y
+apt install nginx certbot python3-certbot-nginx ufw nano git -y
 
 ufw limit $portno
 ufw allow 80
