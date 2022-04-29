@@ -1,8 +1,6 @@
 #!/bin/bash
 
 logging=false
-
-
 #If you turn logging on, be aware your gcnode.log may contain your keys!!
 
 set -eu -o pipefail # fail on error , debug all lines
@@ -36,17 +34,42 @@ function removequotes(){
   echo "$version"
 }
 
+function set_config_value(){
+  #This replaces a key-pair value
+  paramname=$(printf "%q" $1)
+  paramvalue=$(printf "%q" $2)
+
+  #echo $paramname
+  #echo $paramvalue
+  sed -i -E "s/^($paramname[[:blank:]]*=[[:blank:]]*).*/\1$paramvalue/" "$config_file"
+}
+
+#----------------------------------------------------------------------------------------------------#
+# get_config_value: GLOBAL VALUE IS USED AS A GLOBAL VARIABLE TO RETURN THE RESULT                                     #
+#----------------------------------------------------------------------------------------------------#
+
+function get_config_value(){
+  global_value=$(grep -v '^#' "$config_file" | grep "^$1=" | awk -F '=' '{print $2}')
+if [ -z "$global_value" ]
+  then
+    return 1
+  else
+    return 0
+  fi
+}
+
+
 new_version_tag_final=""
 new_version_tag=$(curl -s https://api.github.com/repos/coti-io/$node_folder/releases/latest | jq ".tag_name")
 
 
 #Remove the front and end double quote
 new_version_tag=$(removequotes "$new_version_tag")
-testnet_version="2.0.0"
+
 API_key=""
 coti_dir=""
 
-echo "Latest version for mainnet is $new_version_tag"
+echo "Latest version is $new_version_tag"
 
 shopt -s globstar dotglob
 
@@ -97,9 +120,85 @@ break
 done
 
 
+read -p "What is your ubuntu username (use coti if unsure as it will be created fresh) ?: " username
+
+
+config_file="/home/$username/$node_folder/fullnode.properties"
+if [ -f "$config_file" ]
+then
+echo "fullnode.properties file already exists! We can use this later to save typing everythng in again"
+found_properties=true
+else
+echo "fullnode.properties not found, that is ok,  this is likely a fresh install"
+found_properties=false
+fi
+
+
+
+
+if [[ $found_properties == "true" ]];
+then
+
+cat << "MENUEOF2"
+
+███╗   ███╗███████╗███╗   ██╗██╗   ██╗
+████╗ ████║██╔════╝████╗  ██║██║   ██║
+██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
+██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
+██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
+
+MENUEOF2
+
+PS4='Please choose if you would like to keep the fullnode.properties file that has been found or start a new properties file from scratch. Please write the number of the menu item and press enter'
+keepfile="Use the existing fullnode.properties file that was found"
+newfile="Start a new fullnode.properties file"
+cancelit="Cancel"
+options=("$keepfile" "$newfile" "$cancelit")
+
+select opt in "${options[@]}"
+do
+    case $opt in
+        "$keepfile")
+        actionfile="keepfile"
+        echo "You chose to keep the existing fullnode.properties file"
+        sleep 1
+         break
+            ;;
+        "$newfile")
+            echo "You chose to create a new fullnode.properties file"
+        actionfile="newfile"
+        sleep 1
+        break
+            ;;
+       "$cancelit")
+            echo "${RED}You chose to cancel${COLOR_RESET}"
+        actionfile="cancel"
+        exit 1
+break
+            ;;
+        "Quit")
+            exit 1
+break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
+fi
+
+
+
+
+
+
+
+
+
+
 echo "Welcome to the COTI Node Installer .  We will begin to ask you a series of questions.  Please have to hand:"
 echo "✅ Your SSH Port No"
-echo "✅ Your Ubuntu Username"
+#echo "✅ Your Ubuntu Username"
 echo "✅ Your email address"
 echo "✅ Your server hostname from Godaddy or namecheap etc e.g. coti.mynode.com"
 echo "✅ Your API Key if you are an exchange. If you are not an exchange, leave this empty."
@@ -114,7 +213,7 @@ fi
 read -n 1 -r -s -p $'Press enter to begin...\n'
 
 read -p "What is your ssh port number (likely 22 if you do not know)?: " portno
-read -p "What is your ubuntu username (use coti if unsure as it will be created fresh) ?: " username
+#read -p "What is your ubuntu username (use coti if unsure as it will be created fresh) ?: " username
 read -p "What is your email address?: " email
 read -p "What is your server host name e.g. tutorialnode.cotinodes.com?: " servername
 
@@ -125,8 +224,19 @@ read -p "Exchanges may be provided with an API key.  Please enter it now, or lea
 if [[ $API_key == "" ]] || [ -z "$API_key" ];
 then
 
-read -p "What is your wallet private key?: " pkey
-read -p "What is your wallet seed?: " seed
+#read -p "What is your wallet private key?: " pkey
+
+retrieved_pkey=$(get_config_value "global.private.key")
+retrieved_seed=$(get_config_value "fullnode.seed")
+
+read -e -p "What is your wallet private key?:" -i "$retrieved_pkey" pkey
+read -e -p "What is your wallet seed?:" -i "$retrieved_seed" seed
+
+
+#read -p "What is your wallet seed?: " seed
+
+
+
 else
 pkey=""
 seed=""
@@ -154,7 +264,7 @@ exit 1
 elif [[ $action == "testnet" ]] && [[ $new_version_tag_final == "" ]];
 then
 echo "${YELLOW}No version chosen, that's ok, selecting latest version.${COLOR_RESET}"
-new_version_tag_final=$testnet_version
+new_version_tag_final=$new_version_tag
 fi
 
 
@@ -277,7 +387,7 @@ apt-get update -y && sudo apt-get upgrade -y
 
 #curl -L -b "oraclelicense=a" -O https://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-linux-x64.rpm
 
-wget -c https://coti.tips/downloads/jdk-8u291-linux-x64.tar.gz
+wget --continue --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "https://download.oracle.com/otn-pub/java/jdk/8u291-b10/d7fc238d0cbf4b0dac67be84580cfb4b/jdk-8u291-linux-x64.tar.gz"
 mkdir -p /opt/java-jdk
 tar -C /opt/java-jdk -zxf jdk-8u291-linux-x64.tar.gz
 update-alternatives --install /usr/bin/java java /opt/java-jdk/jdk1.8.0_291/bin/java 1
@@ -348,13 +458,70 @@ chown -R $username: /home/$username/$node_folder/
 cd /home/$username/$node_folder/
 mvn initialize && mvn clean compile && mvn -Dmaven.test.skip=true package
 
-
 logging_file_name="";
 
-if [[ $action == "testnet" ]];
+
+if [[ $found_properties == "true" ]];
 then
 
+cat << "MENUEOF2"
+
+███╗   ███╗███████╗███╗   ██╗██╗   ██╗
+████╗ ████║██╔════╝████╗  ██║██║   ██║
+██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
+██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
+██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
+
+MENUEOF2
+
+PS4='Please choose if you would like to keep the fullnode.properties file that has been found or start a new properties file from scratch. Please write the number of the menu item and press enter'
+keepfile="Use the existing fullnode.properties file that was found"
+newfile="Start a new fullnode.properties file"
+cancelit="Cancel"
+options=("$keepfile" "$newfile" "$cancelit")
+
+select opt in "${options[@]}"
+do
+    case $opt in
+        "$keepfile")
+        actionfile="keepfile"
+        echo "You chose to keep the existing fullnode.properties file"
+        sleep 1
+         break
+            ;;
+        "$newfile")
+            echo "You chose to create a new fullnode.properties file"
+        actionfile="newfile"
+        sleep 1
+        break
+            ;;
+       "$cancelit")
+            echo "${RED}You chose to cancel${COLOR_RESET}"
+        actionfile="cancel"
+        exit 1
+break
+            ;;
+        "Quit")
+            exit 1
+break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
+fi
+
+
+if [[ $found_properties == "false" ]] || [[ $actionfile == "newfile" ]] ;
+then
+#Create a new file
+
+  if [[ $action == "testnet" ]];
+  then
+
 logging_file_name="FullNode1";
+config_file="/home/$username/$node_folder/fullnode.properties"
 cat <<EOF-TESTNET >/home/$username/$node_folder/fullnode.properties
 network=TestNet
 server.ip=$serverip
@@ -380,10 +547,10 @@ whitelist.ips=127.0.0.1,0:0:0:0:0:0:0:1
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
 allow.transaction.monitoring=true
 EOF-TESTNET
-
-elif [[ $action == "mainnet" ]];
-then
+  elif [[ $action == "mainnet" ]];
+  then
 logging_file_name="FullNode1";
+config_file="/home/$username/$node_folder/fullnode.properties"
 cat <<EOF-MAINNET >/home/$username/$node_folder/fullnode.properties
 network=MainNet
 server.ip=$serverip
@@ -406,7 +573,19 @@ node.manager.propagation.port=10001
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
 allow.transaction.monitoring=true
 EOF-MAINNET
+  fi
+
+
+
+else
+#use ecuisting file
 fi
+
+
+
+
+
+
 
 #IF mainnet lets download the dbrecovery and set db.restore to true!
 if [[ $action == "mainnet" ]];
