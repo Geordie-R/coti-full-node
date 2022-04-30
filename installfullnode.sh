@@ -58,6 +58,13 @@ if [ -z "$global_value" ]
   fi
 }
 
+function sha256checkpassed(){
+  hash=$1
+  filename=$2
+  sha_check=$(echo "$hash $filename" | sha256sum -c | awk '{ print $2 }')
+  echo $sha_check
+}
+
 
 new_version_tag_final=""
 new_version_tag=$(curl -s https://api.github.com/repos/coti-io/$node_folder/releases/latest | jq ".tag_name")
@@ -215,7 +222,9 @@ read -n 1 -r -s -p $'Press enter to begin...\n'
 read -p "What is your ssh port number (likely 22 if you do not know)?: " portno
 #read -p "What is your ubuntu username (use coti if unsure as it will be created fresh) ?: " username
 read -p "What is your email address?: " email
-read -p "What is your server host name e.g. tutorialnode.cotinodes.com?: " servername
+retrieved_serverurl=$(get_config_value "server.url")
+echo "$retrieved_serverurl" | sed 's/https:\/\///' | sed 's/http:\/\///'
+read -e -p "What is your server host name e.g. tutorialnode.cotinodes.com?:" -i "$retrieved_serverurl" servername
 
 
 read -p "Exchanges may be provided with an API key.  Please enter it now, or leave it empty and press enter if you are not an exchange:" API_key
@@ -231,9 +240,6 @@ retrieved_seed=$(get_config_value "fullnode.seed")
 
 read -e -p "What is your wallet private key?:" -i "$retrieved_pkey" pkey
 read -e -p "What is your wallet seed?:" -i "$retrieved_seed" seed
-
-
-#read -p "What is your wallet seed?: " seed
 
 
 
@@ -385,9 +391,30 @@ echo "Installing prereqs..."
 
 apt-get update -y && sudo apt-get upgrade -y
 
-#curl -L -b "oraclelicense=a" -O https://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-linux-x64.rpm
-
+#Download jdk-8u291-linux-x64.tar.gz
 wget --continue --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "https://download.oracle.com/otn-pub/java/jdk/8u291-b10/d7fc238d0cbf4b0dac67be84580cfb4b/jdk-8u291-linux-x64.tar.gz"
+
+
+#SHA 256 Check File Integrity Of jdk-8u291-linux-x64.tar.gz
+echo "Downloading jdk-8u291-linux-x64.tar.gz checksum"
+filepathjdk="$path/jdk-8u291-linux-x64.tar.gz"
+wget -O "$path/jdk-8u291-linux-x64.tar.gz.checksum" "https://raw.githubusercontent.com/Geordie-R/coti-full-node/main-v2/jdk-8u291-linux-x64.tar.gz.checksum"
+
+sha256checksum=$(cat jdk-8u291-linux-x64.tar.gz.checksum)
+sha_jdkcheck=$(sha256checkpassed "$sha256checksum" "$filepathjdk")
+
+if [[ $sha_jdkcheck == "OK" ]];
+then
+echo "${GREEN}$filepathjdk sha hash nicely matches $sha256checksum!${COLOR_RESET}"
+else
+echo "${RED}$filepathjdk SHA256 hash match failure!. File maybe compromised or developer has not updated new hash! For safety do not go any further and report this to https://t.me/GeordieR${COLOR_RESET}"
+
+echo "ABORTED INSTALL!"
+exit 1
+fi
+
+
+
 mkdir -p /opt/java-jdk
 tar -C /opt/java-jdk -zxf jdk-8u291-linux-x64.tar.gz
 update-alternatives --install /usr/bin/java java /opt/java-jdk/jdk1.8.0_291/bin/java 1
@@ -402,21 +429,13 @@ wget -c https://downloads.apache.org/maven/maven-3/3.5.4/binaries/apache-maven-3
 mkdir -p /opt/apache-maven-3.5.4/
 tar -C /opt/ -zxf apache-maven-3.5.4-bin.tar.gz
 echo "## Installing maven 3.5.4 END ##"
-echo "A"
 sudo ln -sf /opt/apache-maven-3.5.4 /opt/maven
-echo "B"
 
 
 if [[ ! -e /etc/profile.d/maven.sh ]]; then
 echo "Creating /etc/profile.d/maven.sh"
     touch /etc/profile.d/maven.sh
 fi
-
-echo "C"
-
-
-
-echo "D"
 
 rm -f /etc/profile.d/maven.sh
 
