@@ -26,6 +26,15 @@ GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 COLOR_RESET=$(tput sgr0)
 
+function pad64chars(){
+x=$1
+while [ ${#x} -ne 64 ];
+do
+x="0"$x
+done
+echo "$x"
+}
+
 
 function removequotes(){
   #Remove the front and end double quote
@@ -75,6 +84,7 @@ new_version_tag=$(removequotes "$new_version_tag")
 
 API_key=""
 coti_dir=""
+
 
 echo "Latest version is $new_version_tag"
 
@@ -148,12 +158,21 @@ then
 
 cat << "MENUEOF2"
 
+
+███████╗██╗   ██╗██╗     ██╗     ███╗   ██╗ ██████╗ ██████╗ ███████╗
+██╔════╝██║   ██║██║     ██║     ████╗  ██║██╔═══██╗██╔══██╗██╔════╝
+█████╗  ██║   ██║██║     ██║     ██╔██╗ ██║██║   ██║██║  ██║█████╗
+██╔══╝  ██║   ██║██║     ██║     ██║╚██╗██║██║   ██║██║  ██║██╔══╝
+██║     ╚██████╔╝███████╗███████╗██║ ╚████║╚██████╔╝██████╔╝███████╗
+╚═╝      ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝
+
 ███╗   ███╗███████╗███╗   ██╗██╗   ██╗
 ████╗ ████║██╔════╝████╗  ██║██║   ██║
 ██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
 ██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
 ██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
 ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
+
 
 MENUEOF2
 
@@ -185,7 +204,7 @@ do
 break
             ;;
         "Quit")
-            exit 1
+             exit 1
 break
             ;;
         *) echo "invalid option $REPLY";;
@@ -205,7 +224,7 @@ fi
 
 echo "Welcome to the COTI Node Installer .  We will begin to ask you a series of questions.  Please have to hand:"
 echo "✅ Your SSH Port No"
-#echo "✅ Your Ubuntu Username"
+#echo "✅ Your Ubuntu username"
 echo "✅ Your email address"
 echo "✅ Your server hostname from Godaddy or namecheap etc e.g. coti.mynode.com"
 echo "✅ Your API Key if you are an exchange. If you are not an exchange, leave this empty."
@@ -337,16 +356,6 @@ fi
 #echo "passed fi"
 
 #Lets pad the seeds
-
-function pad64chars(){
-x=$1
-while [ ${#x} -ne 64 ];
-do
-x="0"$x
-done
-echo "$x"
-}
-
 if [[ $API_key == "" ]];
 then
 
@@ -452,7 +461,22 @@ sleep 2
 mvn -version
 echo "Installing nginx certbot python-certbot-nginx ufw nano git..."
 
+#apt install nginx certbot python-certbot-nginx ufw nano git -y
+
+
+ubuntuvers=$(lsb_release -rs)
+echo "Ubuntu version $ubuntuvers detected"
+if [[ $ubuntuvers == "18.04" ]];
+then
+echo "Installing nginx certbot python-certbot-nginx ufw nano git..."
 apt install nginx certbot python-certbot-nginx ufw nano git -y
+else
+echo "Installing nginx certbot python3-certbot-nginx ufw nano git..."
+apt install nginx certbot python3-certbot-nginx ufw nano git -y
+fi
+
+
+
 
 ufw limit $portno
 ufw allow 80
@@ -594,17 +618,9 @@ allow.transaction.monitoring=true
 EOF-MAINNET
   fi
 
-
-
 else
-#use ecuisting file
+echo "using existing fullnode.properties file"
 fi
-
-
-
-
-
-
 
 #IF mainnet lets download the dbrecovery and set db.restore to true!
 if [[ $action == "mainnet" ]];
@@ -626,12 +642,37 @@ FILE=/home/$username/$node_folder/FullNode1_clusterstamp.csv
 cluster_url_mainnet="https://coti.tips/downloads/FullNode1_clusterstamp.csv"
 cluster_url_testnet="https://www.dropbox.com/s/rpyercs56zmay0z/FullNode1_clusterstamp.csv"
 
-if [[ $action == "testnet" ]];
+
+
+
+
+if [ -f "$FILE" ]
+then
+echo "$FILE already exists! Will not be attempting to download a fresh one."
+found_clusterstamp=true
+else
+echo "$FILE not found, that is ok,  this is likely a fresh install"
+found_clusterstamp=false
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+if [[ $action == "testnet" ]] && [[ $found_clusterstamp == "false" ]];
 then
   echo "${YELLOW}Downloading the clusterstamp now from ... ${COLOR_RESET}"
   #wget "$FILE" $cluster_url_testnet
   wget --show-progress --progress=bar:force 2>&1 $cluster_url_testnet -P /home/$username/$node_folder/
-elif [[ $action == "mainnet" ]];
+elif [[ $action == "mainnet" ]] && [[ $found_clusterstamp == "false" ]];
 then
 echo "${YELLOW}Downloading the mainnet clusterstamp now from ... ${COLOR_RESET}"
 #  wget "$FILE" $cluster_url_mainnet
