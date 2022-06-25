@@ -463,6 +463,7 @@ server {
     server_name
     ssl_certificate
     ssl_key
+    ssl_protocols TLSv1.3 TLSv1.2;
     ssl_session_timeout 5m;
     gzip on;
     gzip_comp_level    5;
