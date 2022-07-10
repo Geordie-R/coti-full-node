@@ -504,10 +504,12 @@ server {
 }
 EOF
 
+echo "Doing SED commands to replace vars in /etc/nginx/sites-enabled/coti_fullnode.conf"
+
 sed -i "s/server_name/server_name $servername;/g" /etc/nginx/sites-enabled/coti_fullnode.conf
-sed -i "s:ssl_trusted_certificate:ssl_trusted_certificate /etc/letsencrypt/live/$servername/chain.pem;:g" /etc/nginx/sites-enabled/coti_fullnode.conf
 sed -i "s:ssl_certificate:ssl_certificate /etc/letsencrypt/live/$servername/fullchain.pem;:g" /etc/nginx/sites-enabled/coti_fullnode.conf
 sed -i "s:ssl_key:ssl_certificate_key /etc/letsencrypt/live/$servername/privkey.pem;:g" /etc/nginx/sites-enabled/coti_fullnode.conf
+sed -i "s:ssl_trusted_certificate:ssl_trusted_certificate /etc/letsencrypt/live/$servername/chain.pem;:g" /etc/nginx/sites-enabled/coti_fullnode.conf
 
 
 service nginx restart
