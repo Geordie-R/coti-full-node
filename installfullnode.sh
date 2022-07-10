@@ -292,21 +292,13 @@ wget -c https://downloads.apache.org/maven/maven-3/3.5.4/binaries/apache-maven-3
 mkdir -p /opt/apache-maven-3.5.4/
 tar -C /opt/ -zxf apache-maven-3.5.4-bin.tar.gz
 echo "## Installing maven 3.5.4 END ##"
-echo "A"
-sudo ln -sf /opt/apache-maven-3.5.4 /opt/maven
-echo "B"
 
+sudo ln -sf /opt/apache-maven-3.5.4 /opt/maven
 
 if [[ ! -e /etc/profile.d/maven.sh ]]; then
 echo "Creating /etc/profile.d/maven.sh"
     touch /etc/profile.d/maven.sh
 fi
-
-echo "C"
-
-
-
-echo "D"
 
 rm -f /etc/profile.d/maven.sh
 
@@ -321,9 +313,18 @@ sleep 2
 source /etc/profile.d/maven.sh
 sleep 2
 mvn -version
-echo "Installing nginx certbot python-certbot-nginx ufw nano git..."
 
+
+ubuntuvers=$(lsb_release -rs)
+echo "Ubuntu version $ubuntuvers detected"
+if [[ $ubuntuvers == "18.04" ]];
+then
+echo "Installing nginx certbot python-certbot-nginx ufw nano git..."
 apt install nginx certbot python-certbot-nginx ufw nano git -y
+else
+echo "Installing nginx certbot python3-certbot-nginx ufw nano git..."
+apt install nginx certbot python3-certbot-nginx ufw nano git -y
+fi
 
 ufw limit $portno
 ufw allow 80
@@ -452,6 +453,7 @@ echo "Moving on to NGINX"
 #NGINX Setup
 
 certbot certonly --nginx --non-interactive --agree-tos -m $email -d $servername
+openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
 cat <<'EOF' >/etc/nginx/sites-enabled/coti_fullnode.conf
 server {
@@ -464,7 +466,17 @@ server {
     ssl_certificate
     ssl_key
     ssl_protocols TLSv1.3 TLSv1.2;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    ssl_dhparam /etc/nginx/dhparam.pem;
     ssl_session_timeout 5m;
+    
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_trusted_certificate
+    resolver 1.1.1.1 8.8.8.8 valid=300s;
+    resolver_timeout 10s;
+
     gzip on;
     gzip_comp_level    5;
     gzip_min_length    256;
@@ -493,8 +505,11 @@ server {
 EOF
 
 sed -i "s/server_name/server_name $servername;/g" /etc/nginx/sites-enabled/coti_fullnode.conf
+sed -i "s/ssl_trusted_certificate/ssl_trusted_certificate /etc/letsencrypt/live/$servername/chain.pem;/g" /etc/nginx/sites-enabled/coti_fullnode.conf
 sed -i "s:ssl_certificate:ssl_certificate /etc/letsencrypt/live/$servername/fullchain.pem;:g" /etc/nginx/sites-enabled/coti_fullnode.conf
 sed -i "s:ssl_key:ssl_certificate_key /etc/letsencrypt/live/$servername/privkey.pem;:g" /etc/nginx/sites-enabled/coti_fullnode.conf
+]
+
 
 service nginx restart
 
