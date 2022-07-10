@@ -313,9 +313,18 @@ sleep 2
 source /etc/profile.d/maven.sh
 sleep 2
 mvn -version
-echo "Installing nginx certbot python-certbot-nginx ufw nano git..."
 
+
+ubuntuvers=$(lsb_release -rs)
+echo "Ubuntu version $ubuntuvers detected"
+if [[ $ubuntuvers == "18.04" ]];
+then
+echo "Installing nginx certbot python-certbot-nginx ufw nano git..."
 apt install nginx certbot python-certbot-nginx ufw nano git -y
+else
+echo "Installing nginx certbot python3-certbot-nginx ufw nano git..."
+apt install nginx certbot python3-certbot-nginx ufw nano git -y
+fi
 
 ufw limit $portno
 ufw allow 80
