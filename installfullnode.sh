@@ -468,7 +468,6 @@ server {
     ssl_protocols TLSv1.3 TLSv1.2;
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
     ssl_dhparam /etc/nginx/dhparam.pem;
-    ssl_session_timeout 5m;
     
     # OCSP stapling
     ssl_stapling on;
@@ -476,6 +475,9 @@ server {
     ssl_trusted_certificate
     resolver 1.1.1.1 8.8.8.8 valid=300s;
     resolver_timeout 10s;
+    
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
 
     gzip on;
     gzip_comp_level    5;
