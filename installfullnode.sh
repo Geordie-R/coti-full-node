@@ -8,7 +8,7 @@ logging=false
 set -eu -o pipefail # fail on error , debug all lines
 
 LOG_LOCATION=/root/
-node_folder="coti-fullnode"
+node_folder="coti-node"
 
 if [[ $logging == true ]];
 then
