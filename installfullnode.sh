@@ -8,7 +8,7 @@ logging=false
 set -eu -o pipefail # fail on error , debug all lines
 
 LOG_LOCATION=/root/
-node_folder="coti-fullnode"
+node_folder="coti-node"
 
 if [[ $logging == true ]];
 then
@@ -42,7 +42,7 @@ new_version_tag=$(curl -s https://api.github.com/repos/coti-io/$node_folder/rele
 
 #Remove the front and end double quote
 new_version_tag=$(removequotes "$new_version_tag")
-testnet_version="2.0.0"
+testnet_version="3.1.0"
 API_key=""
 coti_dir=""
 
@@ -380,6 +380,7 @@ allow.transaction.monitoring=true
 whitelist.ips=127.0.0.1,0:0:0:0:0:0:0:1
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
 allow.transaction.monitoring=true
+regular.token.fullnode.fee=1
 EOF-TESTNET
 
 elif [[ $action == "mainnet" ]];
@@ -406,6 +407,7 @@ node.manager.port=7090
 node.manager.propagation.port=10001
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
 allow.transaction.monitoring=true
+regular.token.fullnode.fee=1
 EOF-MAINNET
 fi
 
