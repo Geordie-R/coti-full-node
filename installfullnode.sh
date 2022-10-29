@@ -547,7 +547,7 @@ log_path="/home/$username/$node_folder/logs/$logging_file_name.log"
 echo "Viewing $log_path #<#<#"
 tail -f $log_path | while read line; do
 echo $line
-echo ${GREEN}$line${COLOR_RESET}| grep -q 'COTI FULL NODE IS UP!!' && break;
+echo ${GREEN}$line${COLOR_RESET}| grep -q 'COTI FULL NODE IS UP' && break;
 
 done
 
