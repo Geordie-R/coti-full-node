@@ -3,7 +3,7 @@
 resetarg=$1
 user_name_arg=$2
 mainnet_or_testnet=$3
-node_folder="coti-fullnode"
+node_folder="coti-node"
 
 
 #Parameters
