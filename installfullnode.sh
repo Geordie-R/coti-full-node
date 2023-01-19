@@ -42,7 +42,7 @@ new_version_tag=$(curl -s https://api.github.com/repos/coti-io/$node_folder/rele
 
 #Remove the front and end double quote
 new_version_tag=$(removequotes "$new_version_tag")
-testnet_version="3.1.2"
+testnet_version="3.1.3"
 API_key=""
 coti_dir=""
 
@@ -143,7 +143,7 @@ extra_vers_desc="If you leave this empty, the script will terminate."
 
 fi
 
-read -p "What version node software would you like to use. If you are on mainnet, or if you are an exchange, this should have been communicated to you from COTI. $extra_vers_desc. If entering a version number, remember it takes this format: 3.1.2 ?: " new_version_tag_final
+read -p "What version node software would you like to use. If you are on mainnet, or if you are an exchange, this should have been communicated to you from COTI. $extra_vers_desc. If entering a version number, remember it takes this format: 3.1.3 ?: " new_version_tag_final
 
 
 # If we are on mainnet and a version isnt chosen, terminate the script
@@ -381,6 +381,7 @@ whitelist.ips=127.0.0.1,0:0:0:0:0:0:0:1
 node.manager.public.key=2fc59886c372808952766fa5a39d33d891af69c354e6a5934a258871407536d6705693099f076226ee5bf4b200422e56635a7f3ba86df636757e0ae42415f7c2
 allow.transaction.monitoring=true
 regular.token.fullnode.fee=1
+reset.transactions=true
 EOF-TESTNET
 
 elif [[ $action == "mainnet" ]];
