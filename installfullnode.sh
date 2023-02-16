@@ -36,6 +36,11 @@ function removequotes(){
   echo "$version"
 }
 
+function lowercase(){
+  echo $1 | awk '{print tolower($0)}'
+}
+
+
 new_version_tag_final=""
 new_version_tag=$(curl -s https://api.github.com/repos/coti-io/$node_folder/releases/latest | jq ".tag_name")
 
@@ -118,6 +123,8 @@ read -p "What is your ubuntu username (use coti if unsure as it will be created 
 read -p "What is your email address?: " email
 read -p "What is your server host name e.g. tutorialnode.cotinodes.com?: " servername
 
+#Make the servername lowercase
+servername=$(lowercase $servername)
 
 read -p "Exchanges may be provided with an API key.  Please enter it now, or leave it empty and press enter if you are not an exchange:" API_key
 
