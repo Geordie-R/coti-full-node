@@ -295,7 +295,7 @@ echo "## JAVA VERSION END ##"
 
 
 echo "## Installing maven 3.5.4 START ##"
-wget -c https://downloads.apache.org/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+wget -c https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.5.4/apache-maven-3.5.4-bin.tar.gz
 mkdir -p /opt/apache-maven-3.5.4/
 tar -C /opt/ -zxf apache-maven-3.5.4-bin.tar.gz
 echo "## Installing maven 3.5.4 END ##"
